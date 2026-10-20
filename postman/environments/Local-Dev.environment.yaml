@@ -1,0 +1,11 @@
+name: Local-Dev
+values:
+  - key: base_url
+    value: ''
+  - key: admin_token
+    value: ''
+  - key: seller_token
+    value: ''
+  - key: property_id
+    value: ''
+color: 0

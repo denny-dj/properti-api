@@ -7,8 +7,17 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface PropertyRepositoryInterface extends BaseRepositoryInterface
 {
-    public function findBySlug(string $slug): ?Property;
+    public function findPublishedBySlug(string $slug): ?Property;
 
-    /** Filter lengkap (lokasi, harga, fasilitas) ditambahkan di Fase 2. */
-    public function paginatePublished(int $perPage = 15): LengthAwarePaginator;
+    public function incrementViews(Property $property): void;
+
+    public function paginatePublished(array $filters = [], int $perPage = 12): LengthAwarePaginator;
+
+    public function paginateByPartner(int $partnerId, array $filters = [], int $perPage = 12): LengthAwarePaginator;
+
+    public function paginateForAdmin(array $filters = [], int $perPage = 12): LengthAwarePaginator;
+
+    public function syncFacilities(Property $property, array $facilityIds): void;
+
+    public function loadDetail(Property $property): Property;
 }

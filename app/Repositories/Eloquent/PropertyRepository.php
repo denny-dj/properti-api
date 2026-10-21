@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Repositories\Contracts\PropertyRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class PropertyRepository extends BaseRepository implements PropertyRepositoryInterface
@@ -79,6 +80,25 @@ class PropertyRepository extends BaseRepository implements PropertyRepositoryInt
     public function loadDetail(Property $property): Property
     {
         return $property->load(['partner.partnerProfile', 'images', 'facilities']);
+    }
+
+    public function markers(array $filters = [], int $limit = 200): Collection
+    {
+        $query = $this->model->newQuery()
+            ->select(['id', 'slug', 'title', 'price', 'property_type', 'city', 'latitude', 'longitude'])
+            ->with('coverImage')
+            ->published()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude');
+
+        if (isset($filters['south'], $filters['west'], $filters['north'], $filters['east'])) {
+            $query->whereBetween('latitude', [$filters['south'], $filters['north']])
+                ->whereBetween('longitude', [$filters['west'], $filters['east']]);
+        }
+
+        $this->applyFilters($query, $filters);
+
+        return $query->orderByDesc('published_at')->limit($limit)->get();
     }
 
     // ------------------------------------------------------------------

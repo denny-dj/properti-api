@@ -4,6 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\Property;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 interface PropertyRepositoryInterface extends BaseRepositoryInterface
 {
@@ -20,4 +21,7 @@ interface PropertyRepositoryInterface extends BaseRepositoryInterface
     public function syncFacilities(Property $property, array $facilityIds): void;
 
     public function loadDetail(Property $property): Property;
+
+    /** Titik ringan untuk tampilan peta (filter + bounding box), hanya listing tayang berkoordinat. */
+    public function markers(array $filters = [], int $limit = 200): Collection;
 }

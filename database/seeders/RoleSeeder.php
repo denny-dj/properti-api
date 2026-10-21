@@ -15,6 +15,7 @@ class RoleSeeder extends Seeder
         'users.manage',
         'partners.verify',
         'properties.verify',
+        'bookings.view',
         'transactions.view',
     ];
 

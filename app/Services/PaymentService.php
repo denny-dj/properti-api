@@ -234,7 +234,7 @@ class PaymentService
         return $transaction;
     }
 
-    private function bookingFeeFor(Property $property): float
+    public function bookingFeeFor(Property $property): float
     {
         $cfg = config('payments.property_booking_fee');
         $price = (float) $property->price;

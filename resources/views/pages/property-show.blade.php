@@ -98,6 +98,8 @@
                 <p class="text-sm text-gray-500">{{ $profile?->partner_type?->value === 'architect' ? 'Arsitek' : 'Developer / Agen properti' }}@if ($profile?->city) · {{ $profile->city }}@endif</p>
             </div>
 
+            <livewire:property-actions :property="$property->id" />
+
             <livewire:kpr-calculator :price="$property->price" />
         </aside>
     </div>

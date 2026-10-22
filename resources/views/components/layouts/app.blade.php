@@ -53,11 +53,26 @@
 
         <div class="hidden items-center gap-3 md:flex">
             @auth
-                <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium hover:bg-gray-50">Keluar</button>
-                </form>
+                @php $me = auth()->user(); @endphp
+                <div class="relative" x-data="{ menu: false }" x-on:click.outside="menu = false">
+                    <button type="button" x-on:click="menu = !menu" class="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-700">
+                        {{ $me->name }}
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="menu" x-cloak class="absolute right-0 mt-2 w-52 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                        @if ($me->hasAnyRole(['user', 'partner']))
+                            <a href="{{ route('chat.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Chat</a>
+                        @endif
+                        @if ($me->hasRole('user'))
+                            <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Pesanan konsultasi</a>
+                            <a href="{{ route('transactions.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Transaksi</a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="block w-full px-4 py-2 text-left text-sm hover:bg-gray-50">Keluar</button>
+                        </form>
+                    </div>
+                </div>
             @else
                 <a href="{{ route('login') }}" class="text-sm font-medium text-gray-700 hover:text-blue-700">Masuk</a>
                 <a href="{{ route('register') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Daftar</a>
@@ -75,9 +90,16 @@
         @endforeach
         <div class="mt-2 border-t border-gray-100 pt-3">
             @auth
+                @if (auth()->user()->hasAnyRole(['user', 'partner']))
+                    <a href="{{ route('chat.index') }}" class="block py-2 text-sm font-medium text-gray-700">Chat</a>
+                @endif
+                @if (auth()->user()->hasRole('user'))
+                    <a href="{{ route('orders.index') }}" class="block py-2 text-sm font-medium text-gray-700">Pesanan konsultasi</a>
+                    <a href="{{ route('transactions.index') }}" class="block py-2 text-sm font-medium text-gray-700">Transaksi</a>
+                @endif
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="text-sm font-medium text-gray-700">Keluar ({{ auth()->user()->name }})</button>
+                    <button type="submit" class="py-2 text-sm font-medium text-gray-700">Keluar ({{ auth()->user()->name }})</button>
                 </form>
             @else
                 <a href="{{ route('login') }}" class="mr-4 text-sm font-medium text-gray-700">Masuk</a>

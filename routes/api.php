@@ -3,18 +3,25 @@
 use App\Http\Controllers\Api\V1\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Api\V1\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Api\V1\Admin\PropertyController as AdminPropertyController;
+use App\Http\Controllers\Api\V1\Admin\TransactionController as AdminTransactionController;
 use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\ArchitectServiceController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BookingController;
+use App\Http\Controllers\Api\V1\ConversationController;
 use App\Http\Controllers\Api\V1\FacilityController;
 use App\Http\Controllers\Api\V1\KprController;
 use App\Http\Controllers\Api\V1\MapController;
+use App\Http\Controllers\Api\V1\MessageController;
 use App\Http\Controllers\Api\V1\Partner\ArchitectServiceController as PartnerArchitectServiceController;
 use App\Http\Controllers\Api\V1\Partner\AvailabilityController;
 use App\Http\Controllers\Api\V1\Partner\BookingController as PartnerBookingController;
 use App\Http\Controllers\Api\V1\Partner\PropertyController as PartnerPropertyController;
+use App\Http\Controllers\Api\V1\Partner\PropertySaleController;
+use App\Http\Controllers\Api\V1\Partner\TransactionController as PartnerTransactionController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PropertyController;
+use App\Http\Controllers\Api\V1\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -44,6 +51,9 @@ Route::prefix('v1')->group(function () {
     Route::get('architect-services/{slug}', [ArchitectServiceController::class, 'show']);
     Route::get('architect-services/{slug}/slots', [ArchitectServiceController::class, 'slots']);
 
+    // Webhook payment gateway (publik; keaslian diverifikasi lewat signature)
+    Route::post('payments/notification', [PaymentController::class, 'notification']);
+
     // ---------- Terautentikasi ----------
     Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
@@ -53,12 +63,29 @@ Route::prefix('v1')->group(function () {
             Route::get('reverse-geocode', [MapController::class, 'reverseGeocode']);
         });
 
-        // Buyer / klien: pemesanan konsultasi arsitek
+        // Chat: buyer & partner (admin tidak ikut membaca chat privat)
+        Route::middleware('role:user|partner')->group(function () {
+            Route::get('conversations', [ConversationController::class, 'index']);
+            Route::post('conversations', [ConversationController::class, 'store'])->middleware('role:user');
+            Route::get('conversations/{conversation}/messages', [MessageController::class, 'index']);
+            Route::post('conversations/{conversation}/messages', [MessageController::class, 'store'])->middleware('throttle:30,1');
+            Route::post('conversations/{conversation}/read', [ConversationController::class, 'read']);
+        });
+
+        // Detail & sinkronisasi transaksi (akses dicek oleh TransactionPolicy)
+        Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
+        Route::post('transactions/{transaction}/sync', [TransactionController::class, 'sync'])->middleware('throttle:20,1');
+
+        // Buyer / klien
         Route::middleware('role:user')->group(function () {
             Route::get('bookings', [BookingController::class, 'index']);
             Route::post('bookings', [BookingController::class, 'store'])->middleware('throttle:20,1');
             Route::get('bookings/{booking}', [BookingController::class, 'show']);
             Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
+
+            Route::post('payments/property-booking-fee', [PaymentController::class, 'propertyBookingFee'])->middleware('throttle:10,1');
+            Route::post('payments/architect-bookings', [PaymentController::class, 'architectBooking'])->middleware('throttle:10,1');
+            Route::get('transactions', [TransactionController::class, 'index']);
         });
 
         // Partner (Seller): listing properti
@@ -72,6 +99,8 @@ Route::prefix('v1')->group(function () {
                 Route::delete('{property}', [PartnerPropertyController::class, 'destroy']);
                 Route::post('{property}/submit', [PartnerPropertyController::class, 'submit']);
                 Route::post('{property}/images', [PartnerPropertyController::class, 'uploadImages']);
+                Route::post('{property}/mark-sold', [PropertySaleController::class, 'markSold']);
+                Route::post('{property}/release', [PropertySaleController::class, 'release']);
 
                 Route::scopeBindings()->group(function () {
                     Route::delete('{property}/images/{image}', [PartnerPropertyController::class, 'destroyImage']);
@@ -79,6 +108,9 @@ Route::prefix('v1')->group(function () {
                 });
             });
         });
+
+        // Partner (semua tipe): pembayaran masuk
+        Route::get('partner/transactions', [PartnerTransactionController::class, 'index'])->middleware('role:partner');
 
         // Partner (Architect): layanan, jadwal, pesanan masuk
         Route::prefix('partner')->middleware(['role:partner', 'partner.approved:architect'])->group(function () {
@@ -119,6 +151,12 @@ Route::prefix('v1')->group(function () {
             Route::middleware('permission:bookings.view')->group(function () {
                 Route::get('bookings', [AdminBookingController::class, 'index']);
                 Route::get('bookings/{booking}', [AdminBookingController::class, 'show']);
+            });
+
+            Route::middleware('permission:transactions.view')->group(function () {
+                Route::get('transactions', [AdminTransactionController::class, 'index']);
+                Route::get('transactions/summary', [AdminTransactionController::class, 'summary']); // sebelum {transaction}
+                Route::get('transactions/{transaction}', [AdminTransactionController::class, 'show']);
             });
         });
     });

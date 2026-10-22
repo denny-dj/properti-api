@@ -1,0 +1,57 @@
+$kind: http-request
+name: "{{base_url}}/partner/properties"
+description: ""
+url: "{{base_url}}/partner/properties"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r
+
+    \  \"title\": \"Rumah Minimalis Modern\",\r
+
+    \  \"property_type\": \"house\",\r
+
+    \  \"listing_type\": \"sale\",\r
+
+    \  \"price\": 850000000,\r
+
+    \  \"city\": \"Depok\",\r
+
+    \  \"province\": \"Jawa Barat\",\r
+
+    \  \"district\": \"Cinere\",\r
+
+    \  \"address\": \"l. Mawar No. 123\",\r
+
+    \  \"certificate\": \"SHM\",\r
+
+    \  \"bedrooms\": 3,\r
+
+    \  \"bathrooms\": 2,\r
+
+    \  \"land_area\": 120,\r
+
+    \  \"building_area\": 90,\r
+
+    \  \"lat\": -6.34567,\r
+
+    \  \"lng\": 106.78901\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{seller_token}}"
+scripts:
+  - type: afterResponse
+    code: "const res = pm.response.json();\r
+
+      if (res.data && res.data.id) {\r
+
+      \    pm.environment.set(\"property_id\", res.data.id);\r
+
+      }"
+    language: text/javascript
+order: 1000

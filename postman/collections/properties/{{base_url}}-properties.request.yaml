@@ -1,0 +1,31 @@
+$kind: http-request
+name: "{{base_url}}/properties"
+description: ""
+url: "{{base_url}}/properties?city=Depok&max_price=1000000000&lat=-6.34&lng=106.78&radius_km=10&sort=nearest"
+method: GET
+queryParams:
+  - key: city
+    value: Depok
+    disabled: false
+    description: Filter kota
+  - key: max_price
+    value: "1000000000"
+    disabled: false
+    description: Maksimal harga 1 M
+  - key: lat
+    value: "-6.34"
+    disabled: false
+    description: Koordinat titik uji
+  - key: lng
+    value: "106.78"
+    disabled: false
+    description: Koordinat titik uji
+  - key: radius_km
+    value: "10"
+    disabled: false
+    description: Jarak radius
+  - key: sort
+    value: nearest
+    disabled: false
+    description: Urutkan terdekat
+order: 1000

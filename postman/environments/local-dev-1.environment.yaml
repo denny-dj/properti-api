@@ -1,0 +1,12 @@
+name: local-dev
+values:
+  - key: buyer_token
+    value: ''
+  - key: partner_token
+    value: ''
+  - key: conversation_id
+    value: ''
+  - key: property_id
+    value: ''
+  - key: base_url
+    value: ''

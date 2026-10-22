@@ -14,14 +14,21 @@ class PropertyPolicy
         return $user->id === $property->partner_id || $user->isAdmin();
     }
 
-    /** Hanya pemilik; properti yang sudah terjual dikunci. */
+    /** Hanya pemilik; properti yang sudah dipesan/terjual dikunci dari perubahan. */
     public function update(User $user, Property $property): bool
     {
         return $user->id === $property->partner_id
-            && $property->status !== PropertyStatus::Sold;
+            && ! in_array($property->status, [PropertyStatus::Reserved, PropertyStatus::Sold], true);
     }
 
     public function delete(User $user, Property $property): bool
+    {
+        return $user->id === $property->partner_id
+            && ! in_array($property->status, [PropertyStatus::Reserved, PropertyStatus::Sold], true);
+    }
+
+    /** Menandai terjual / melepas reservasi. */
+    public function manageSale(User $user, Property $property): bool
     {
         return $user->id === $property->partner_id;
     }

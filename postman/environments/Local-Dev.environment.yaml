@@ -6,6 +6,12 @@ values:
     value: ''
   - key: seller_token
     value: ''
+  - key: buyer_token
+    value: ''
+  - key: partner_token
+    value: ''
+  - key: conversation_id
+    value: ''
   - key: property_id
     value: ''
 color: 0

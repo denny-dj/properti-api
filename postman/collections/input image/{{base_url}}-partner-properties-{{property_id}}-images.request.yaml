@@ -1,0 +1,21 @@
+$kind: http-request
+name: "{{base_url}}/partner/properties/{{property_id}}/images"
+description: ""
+url: "{{base_url}}/partner/properties/{{property_id}}/images"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: formdata
+  content:
+    - type: file
+      key: images[]
+      src:
+        - /C:/Users/LenovoYoga/OneDrive/Pictures/GCP Console.png
+      description: ""
+      disabled: false
+auth:
+  type: bearer
+  credentials:
+    token: "{{seller_token}}"
+order: 1000

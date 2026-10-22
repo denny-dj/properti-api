@@ -1,0 +1,12 @@
+$kind: http-request
+name: "{{base_url}}/admin/properties/{{property_id}}/approve"
+description: ""
+url: "{{base_url}}/admin/properties/{{property_id}}/approve"
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{admin_token}}"
+order: 1000

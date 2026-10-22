@@ -1,0 +1,12 @@
+$kind: http-request
+name: "{{base_url}}/partner/properties/{{property_id}}/submit"
+description: ""
+url: "{{base_url}}/partner/properties/{{property_id}}/submit"
+method: POST
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{seller_token}}"
+order: 1000

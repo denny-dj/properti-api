@@ -21,24 +21,22 @@ class AuthService
     ) {
     }
 
-    /** @return array{user: User, token: string} */
-    public function registerBuyer(array $data): array
+    // ---------- Pembuatan akun (dipakai API dan web) ----------
+
+    public function createBuyer(array $data): User
     {
-        $user = DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data) {
             /** @var User $user */
             $user = $this->users->create(Arr::only($data, ['name', 'email', 'phone', 'password']));
             $user->assignRole(RoleName::User->value);
 
             return $user;
         });
-
-        return $this->issueToken($user, $data['device_name'] ?? null);
     }
 
-    /** @return array{user: User, token: string} */
-    public function registerPartner(array $data): array
+    public function createPartner(array $data): User
     {
-        $user = DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data) {
             /** @var User $user */
             $user = $this->users->create(Arr::only($data, ['name', 'email', 'phone', 'password']));
             $user->assignRole(RoleName::Partner->value);
@@ -53,8 +51,20 @@ class AuthService
 
             return $user;
         });
+    }
 
-        return $this->issueToken($user, $data['device_name'] ?? null);
+    // ---------- API (token Sanctum) ----------
+
+    /** @return array{user: User, token: string} */
+    public function registerBuyer(array $data): array
+    {
+        return $this->issueToken($this->createBuyer($data), $data['device_name'] ?? null);
+    }
+
+    /** @return array{user: User, token: string} */
+    public function registerPartner(array $data): array
+    {
+        return $this->issueToken($this->createPartner($data), $data['device_name'] ?? null);
     }
 
     /** @return array{user: User, token: string} */

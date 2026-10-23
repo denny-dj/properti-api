@@ -67,7 +67,7 @@ class RegisterPartner extends Component
         Auth::login($user);
         session()->regenerate();
 
-        return redirect()->route('home')->with(
+        return redirect()->route('partner.dashboard')->with(
             'status',
             'Pendaftaran mitra berhasil. Akun Anda menunggu verifikasi administrator sebelum dapat memposting.'
         );

@@ -8,6 +8,14 @@
             'cancelled' => ['Dibatalkan', 'bg-gray-100 text-gray-700'],
             'completed' => ['Selesai', 'bg-green-100 text-green-800'],
         ],
+        'property' => [
+            'draft' => ['Draft', 'bg-gray-100 text-gray-700'],
+            'pending_review' => ['Menunggu verifikasi', 'bg-amber-100 text-amber-800'],
+            'published' => ['Tayang', 'bg-green-100 text-green-800'],
+            'reserved' => ['Dipesan', 'bg-blue-100 text-blue-800'],
+            'rejected' => ['Ditolak', 'bg-red-100 text-red-800'],
+            'sold' => ['Terjual', 'bg-purple-100 text-purple-800'],
+        ],
         'transaction' => [
             'pending' => ['Menunggu pembayaran', 'bg-amber-100 text-amber-800'],
             'paid' => ['Lunas', 'bg-green-100 text-green-800'],

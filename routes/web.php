@@ -6,7 +6,9 @@ use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\LogoutController;
 use App\Http\Controllers\Web\OrderPageController;
 use App\Http\Controllers\Web\PaymentFinishController;
+use App\Http\Controllers\Web\Partner\PropertyPageController as PartnerPropertyPageController;
 use App\Http\Controllers\Web\PropertyPageController;
+use App\Http\Middleware\EnsurePartnerApprovedWeb;
 use Illuminate\Support\Facades\Route;
 
 // ---------- Publik ----------
@@ -49,5 +51,25 @@ Route::middleware('auth')->group(function () {
 
         // Tujuan redirect Midtrans setelah pembayaran (lihat PAYMENT_FINISH_URL)
         Route::get('/pembayaran/selesai', PaymentFinishController::class)->name('payments.finish');
+    });
+});
+
+// ---------- Dashboard mitra (seller & arsitek) ----------
+Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->group(function () {
+    Route::view('/', 'pages.partner.dashboard')->name('dashboard');
+    Route::view('/transaksi', 'pages.partner.transactions')->name('transactions');
+
+    // Khusus seller yang sudah diverifikasi
+    Route::middleware(EnsurePartnerApprovedWeb::class.':seller')->group(function () {
+        Route::view('/properti', 'pages.partner.properties')->name('properties.index');
+        Route::view('/properti/baru', 'pages.partner.property-create')->name('properties.create');
+        Route::get('/properti/{property}/ubah', [PartnerPropertyPageController::class, 'edit'])->name('properties.edit');
+    });
+
+    // Khusus arsitek yang sudah diverifikasi
+    Route::middleware(EnsurePartnerApprovedWeb::class.':architect')->group(function () {
+        Route::view('/layanan', 'pages.partner.services')->name('services');
+        Route::view('/jadwal', 'pages.partner.availability')->name('availability');
+        Route::view('/pesanan', 'pages.partner.bookings')->name('bookings');
     });
 });

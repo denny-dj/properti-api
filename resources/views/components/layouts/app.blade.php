@@ -60,6 +60,9 @@
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="menu" x-cloak class="absolute right-0 mt-2 w-52 rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                        @if ($me->hasRole('partner'))
+                            <a href="{{ route('partner.dashboard') }}" class="block px-4 py-2 text-sm font-medium text-blue-700 hover:bg-gray-50">Dashboard mitra</a>
+                        @endif
                         @if ($me->hasAnyRole(['user', 'partner']))
                             <a href="{{ route('chat.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Chat</a>
                         @endif
@@ -90,6 +93,9 @@
         @endforeach
         <div class="mt-2 border-t border-gray-100 pt-3">
             @auth
+                @if (auth()->user()->hasRole('partner'))
+                    <a href="{{ route('partner.dashboard') }}" class="block py-2 text-sm font-medium text-blue-700">Dashboard mitra</a>
+                @endif
                 @if (auth()->user()->hasAnyRole(['user', 'partner']))
                     <a href="{{ route('chat.index') }}" class="block py-2 text-sm font-medium text-gray-700">Chat</a>
                 @endif

@@ -73,3 +73,14 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
         Route::view('/pesanan', 'pages.partner.bookings')->name('bookings');
     });
 });
+
+// ---------- Dashboard admin ----------
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::view('/', 'pages.admin.dashboard')->name('dashboard');
+
+    Route::view('/mitra', 'pages.admin.partners')->middleware('permission:partners.verify')->name('partners');
+    Route::view('/properti', 'pages.admin.properties')->middleware('permission:properties.verify')->name('properties');
+    Route::view('/pengguna', 'pages.admin.users')->middleware('permission:users.manage')->name('users');
+    Route::view('/pesanan', 'pages.admin.bookings')->middleware('permission:bookings.view')->name('bookings');
+    Route::view('/transaksi', 'pages.admin.transactions')->middleware('permission:transactions.view')->name('transactions');
+});

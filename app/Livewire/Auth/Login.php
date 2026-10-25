@@ -50,7 +50,12 @@ class Login extends Component
         RateLimiter::clear($key);
         session()->regenerate();
 
-        $home = Auth::user()->hasRole('partner') ? route('partner.dashboard') : route('home');
+        $user = Auth::user();
+        $home = match (true) {
+            $user->hasRole('admin') => route('admin.dashboard'),
+            $user->hasRole('partner') => route('partner.dashboard'),
+            default => route('home'),
+        };
 
         return redirect()->intended($home);
     }

@@ -28,11 +28,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+            
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'active' => EnsureUserIsActive::class,
             'partner.approved' => EnsurePartnerApproved::class,
+        ]);
+        // Hentikan sesi web akun yang disuspend pada request berikutnya
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureUserIsActiveWeb::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

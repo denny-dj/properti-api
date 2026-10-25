@@ -15,6 +15,7 @@ class Transaction extends Model
         'gateway', 'snap_token', 'redirect_url', 'payment_type', 'payment_channel',
         'installment_term', 'gateway_transaction_id', 'fraud_status',
         'needs_review', 'paid_at', 'expires_at', 'gateway_payload',
+        'review_note', 'reviewed_by', 'reviewed_at',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class Transaction extends Model
             'needs_review' => 'boolean',
             'paid_at' => 'datetime',
             'expires_at' => 'datetime',
+            'reviewed_at' => 'datetime',
             'gateway_payload' => 'array',
         ];
     }
@@ -54,5 +56,10 @@ class Transaction extends Model
     public function architectBooking(): BelongsTo
     {
         return $this->belongsTo(ArchitectBooking::class);
+    }
+
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

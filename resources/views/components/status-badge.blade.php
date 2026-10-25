@@ -16,6 +16,15 @@
             'rejected' => ['Ditolak', 'bg-red-100 text-red-800'],
             'sold' => ['Terjual', 'bg-purple-100 text-purple-800'],
         ],
+        'verification' => [
+            'pending' => ['Menunggu verifikasi', 'bg-amber-100 text-amber-800'],
+            'approved' => ['Terverifikasi', 'bg-green-100 text-green-800'],
+            'rejected' => ['Ditolak', 'bg-red-100 text-red-800'],
+        ],
+        'user' => [
+            'active' => ['Aktif', 'bg-green-100 text-green-800'],
+            'suspended' => ['Disuspend', 'bg-red-100 text-red-800'],
+        ],
         'transaction' => [
             'pending' => ['Menunggu pembayaran', 'bg-amber-100 text-amber-800'],
             'paid' => ['Lunas', 'bg-green-100 text-green-800'],

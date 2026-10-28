@@ -2,12 +2,21 @@
 
 namespace App\Notifications;
 
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /** Email generik: subjek, beberapa baris isi, dan satu tombol aksi opsional. */
-class EventNotification extends Notification
+class EventNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
+    /** Percobaan ulang bila server email sedang bermasalah. */
+    public int $tries = 3;
+
+    public array $backoff = [30, 120];
+
     /** @param  array<int, string>  $lines */
     public function __construct(
         public readonly string $subject,

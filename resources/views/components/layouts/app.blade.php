@@ -6,9 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name') }}</title>
 
-    {{-- Tailwind via CDN: cukup untuk pengembangan. Ganti dengan build Vite sebelum produksi. --}}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>[x-cloak]{display:none!important}</style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     {{-- Pemuat Google Maps JavaScript API (sekali saja, hanya bila key tersedia) --}}
     <script>

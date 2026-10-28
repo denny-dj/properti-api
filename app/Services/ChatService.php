@@ -18,6 +18,8 @@ use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ChatService
 {
@@ -102,7 +104,13 @@ class ChatService
         });
 
         // toOthers(): perangkat pengirim yang sama (X-Socket-ID) tidak menerima gema.
-        broadcast(new MessageSent($message))->toOthers();
+        try {
+            $pending = broadcast(new MessageSent($message))->toOthers();
+            unset($pending); // PendingBroadcast baru dikirim saat dilepas
+        } catch (Throwable $e) {
+            // Pesan sudah tersimpan; penerima tetap melihatnya lewat polling/refresh.
+            Log::warning('Siaran chat gagal', ['message_id' => $message->id, 'error' => $e->getMessage()]);
+        }
 
         return $message;
     }

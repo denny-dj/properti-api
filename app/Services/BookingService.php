@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\BookingStatus;
+use App\Support\EmailVerification;
 use App\Exceptions\ApiException;
 use App\Models\ArchitectBooking;
 use App\Models\User;
@@ -50,6 +51,8 @@ class BookingService
 
     public function create(User $client, array $data): ArchitectBooking
     {
+        EmailVerification::require($client);
+
         $service = $this->services->findActiveById((int) $data['architect_service_id'])
             ?? throw new ApiException('Layanan arsitek tidak tersedia.', 404);
 

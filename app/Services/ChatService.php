@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\PropertyStatus;
+use App\Support\EmailVerification;
 use App\Events\MessageSent;
 use App\Exceptions\ApiException;
 use App\Models\Conversation;
@@ -37,6 +38,8 @@ class ChatService
     /** Memulai (atau membuka kembali) percakapan buyer -> partner, opsional dengan pesan pertama. */
     public function start(User $buyer, array $data): Conversation
     {
+        EmailVerification::require($buyer);
+
         [$partnerId, $contextKey, $propertyId, $serviceId] = $this->resolveContext($data);
 
         if ($partnerId === $buyer->id) {
@@ -121,7 +124,7 @@ class ChatService
         if (! empty($data['property_id'])) {
             $property = $this->properties->find((int) $data['property_id']);
 
-            if (! $property || $property->status !== PropertyStatus::Published) {
+            if (! $property || $property->status !== PropertyStatus::Published || ! $property->partner?->isActive()) {
                 throw new ApiException('Properti tidak tersedia.', 404);
             }
 

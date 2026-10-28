@@ -8,6 +8,7 @@ use App\Exceptions\ApiException;
 use App\Models\User;
 use App\Repositories\Contracts\PartnerProfileRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Support\Notifier;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +24,7 @@ class AuthService
 
     // ---------- Pembuatan akun (dipakai API dan web) ----------
 
-    public function createBuyer(array $data): User
+    private function makeBuyer(array $data): User
     {
         return DB::transaction(function () use ($data) {
             /** @var User $user */
@@ -34,7 +35,7 @@ class AuthService
         });
     }
 
-    public function createPartner(array $data): User
+    private function makePartner(array $data): User
     {
         return DB::transaction(function () use ($data) {
             /** @var User $user */
@@ -51,6 +52,22 @@ class AuthService
 
             return $user;
         });
+    }
+
+    public function createBuyer(array $data): User
+    {
+        $user = $this->makeBuyer($data);
+        Notifier::verification($user);
+
+        return $user;
+    }
+
+    public function createPartner(array $data): User
+    {
+        $user = $this->makePartner($data);
+        Notifier::verification($user);
+
+        return $user;
     }
 
     // ---------- API (token Sanctum) ----------

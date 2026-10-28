@@ -24,6 +24,14 @@ use App\Repositories\Eloquent\PropertyImageRepository;
 use App\Repositories\Eloquent\PropertyRepository;
 use App\Repositories\Eloquent\TransactionRepository;
 use App\Repositories\Eloquent\UserRepository;
+use App\Models\ArchitectBooking;
+use App\Models\PartnerProfile;
+use App\Models\Property;
+use App\Models\Transaction;
+use App\Observers\ArchitectBookingObserver;
+use App\Observers\PartnerProfileObserver;
+use App\Observers\PropertyObserver;
+use App\Observers\TransactionObserver;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -42,4 +50,13 @@ class RepositoryServiceProvider extends ServiceProvider
         MessageRepositoryInterface::class => MessageRepository::class,
         TransactionRepositoryInterface::class => TransactionRepository::class,
     ];
+
+    /** Observer: kirim notifikasi email saat status penting berubah (dari API, web, maupun admin). */
+    public function boot(): void
+    {
+        PartnerProfile::observe(PartnerProfileObserver::class);
+        Property::observe(PropertyObserver::class);
+        ArchitectBooking::observe(ArchitectBookingObserver::class);
+        Transaction::observe(TransactionObserver::class);
+    }
 }

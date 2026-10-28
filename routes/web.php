@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\OrderPageController;
 use App\Http\Controllers\Web\PaymentFinishController;
 use App\Http\Controllers\Web\Partner\PropertyPageController as PartnerPropertyPageController;
 use App\Http\Controllers\Web\PropertyPageController;
+use App\Http\Controllers\Web\VerifyEmailController;
 use App\Http\Middleware\EnsurePartnerApprovedWeb;
 use Illuminate\Support\Facades\Route;
 
@@ -28,9 +29,19 @@ Route::middleware('guest')->group(function () {
     Route::view('/masuk', 'pages.login')->name('login');
     Route::view('/daftar', 'pages.register')->name('register');
     Route::view('/daftar-mitra', 'pages.register-partner')->name('register.partner');
+    Route::view('/lupa-password', 'pages.forgot-password')->name('password.request');
+    Route::view('/reset-password/{token}', 'pages.reset-password')->name('password.reset');
 });
 
 Route::post('/keluar', LogoutController::class)->middleware('auth')->name('logout');
+
+// ---------- Verifikasi email ----------
+Route::middleware('auth')->group(function () {
+    Route::view('/verifikasi-email', 'pages.verify-notice')->name('verification.notice');
+    Route::get('/verifikasi-email/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+});
 
 // ---------- Area akun (wajib login) ----------
 Route::middleware('auth')->group(function () {

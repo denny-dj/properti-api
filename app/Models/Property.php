@@ -79,8 +79,10 @@ class Property extends Model
     }
 
     // ---- Scopes ----
+    /** Tayang = status published DAN pemiliknya masih aktif (mitra disuspend/dihapus -> tersembunyi). */
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('status', PropertyStatus::Published->value);
+        return $query->where('status', PropertyStatus::Published->value)
+            ->whereHas('partner', fn (Builder $q) => $q->where('status', 'active'));
     }
 }

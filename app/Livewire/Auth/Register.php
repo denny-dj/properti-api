@@ -45,7 +45,7 @@ class Register extends Component
         Auth::login($user);
         session()->regenerate();
 
-        return redirect()->route('home')->with('status', 'Selamat datang! Akun Anda berhasil dibuat.');
+        return redirect()->route('home')->with('status', 'Selamat datang! Akun Anda berhasil dibuat. Kami mengirim tautan verifikasi ke email Anda.');
     }
 
     public function render()

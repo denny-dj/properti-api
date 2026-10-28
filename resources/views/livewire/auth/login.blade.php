@@ -13,9 +13,12 @@
             <input id="password" type="password" wire:model="password" autocomplete="current-password" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none">
             @error('password')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
         </div>
-        <label class="flex items-center gap-2 text-sm text-gray-600">
-            <input type="checkbox" wire:model="remember" class="rounded border-gray-300"> Ingat saya
-        </label>
+        <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2 text-sm text-gray-600">
+                <input type="checkbox" wire:model="remember" class="rounded border-gray-300"> Ingat saya
+            </label>
+            <a href="{{ route('password.request') }}" class="text-sm font-medium text-blue-700 hover:underline">Lupa password?</a>
+        </div>
         <button type="submit" class="w-full rounded-lg bg-blue-600 py-2.5 font-medium text-white hover:bg-blue-700" wire:loading.attr="disabled">
             <span wire:loading.remove>Masuk</span><span wire:loading>Memproses...</span>
         </button>

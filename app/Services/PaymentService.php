@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\BookingStatus;
+use App\Support\EmailVerification;
 use App\Enums\PropertyStatus;
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
@@ -32,11 +33,13 @@ class PaymentService
     /** Booking fee (tanda jadi) untuk membeli properti. */
     public function checkoutProperty(User $buyer, int $propertyId): Transaction
     {
+        EmailVerification::require($buyer);
+
         return DB::transaction(function () use ($buyer, $propertyId) {
             // Kunci baris properti: dua pembeli tidak bisa checkout bersamaan.
             $property = $this->transactions->lockProperty($propertyId);
 
-            if (! $property || $property->status !== PropertyStatus::Published) {
+            if (! $property || $property->status !== PropertyStatus::Published || ! $property->partner?->isActive()) {
                 throw new ApiException('Properti tidak tersedia untuk dipesan.', 422);
             }
 
@@ -73,6 +76,8 @@ class PaymentService
     /** Pembayaran jasa konsultasi arsitek (setelah pesanan dikonfirmasi arsitek). */
     public function checkoutBooking(User $client, int $bookingId): Transaction
     {
+        EmailVerification::require($client);
+
         return DB::transaction(function () use ($client, $bookingId) {
             $booking = $this->transactions->lockBooking($bookingId);
 

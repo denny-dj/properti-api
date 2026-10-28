@@ -121,6 +121,14 @@
     </div>
 </header>
 
+@auth
+    @if (! auth()->user()->hasVerifiedEmail() && ! request()->routeIs('verification.*'))
+        <div class="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm text-amber-900">
+            Email Anda belum diverifikasi. <a href="{{ route('verification.notice') }}" class="font-medium underline">Verifikasi sekarang</a> agar bisa memesan, chat, dan membayar.
+        </div>
+    @endif
+@endauth
+
 @if (session('status'))
     <div class="border-b border-green-200 bg-green-50 px-4 py-3 text-center text-sm text-green-800">{{ session('status') }}</div>
 @endif

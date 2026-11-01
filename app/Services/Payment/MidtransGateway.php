@@ -71,6 +71,10 @@ class MidtransGateway implements PaymentGatewayInterface
                 'status' => $response->status(),
                 'body' => $response->json(),
             ]);
+        //     // Sisipkan baris ini tepat di sini:
+        // dd($this->serverKey(), $this->snapUrl());
+        // tampilkan hasil debug dari server key dan URL snap untuk memastikan keduanya benar.
+        // dd($response->status(), $response->json(), $payload);
 
             throw new ApiException('Gagal membuat tagihan pembayaran. Silakan coba lagi.', 502);
         }

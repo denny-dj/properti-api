@@ -34,7 +34,9 @@
         ['Beranda', route('home'), request()->routeIs('home')],
         ['Cari Properti', route('properties.index'), request()->routeIs('properties.*')],
         ['Peta', route('map'), request()->routeIs('map')],
-        ['Arsitek', route('architects.index'), request()->routeIs('architects.*')],
+        ['Portofolio', route('portfolios.index'), request()->routeIs('portfolios.*')],
+        ['Cara Kerja', route('how-it-works'), request()->routeIs('how-it-works')],
+        ...(config('concierge.legacy_ui', true) ? [['Arsitek (konsultasi)', route('architects.index'), request()->routeIs('architects.*')]] : []),
         ['Simulasi KPR', route('kpr'), request()->routeIs('kpr')],
     ];
 @endphp

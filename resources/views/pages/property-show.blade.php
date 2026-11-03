@@ -98,9 +98,13 @@
                 <p class="text-sm text-gray-500">{{ $profile?->partner_type?->value === 'architect' ? 'Arsitek' : 'Developer / Agen properti' }}@if ($profile?->city) · {{ $profile->city }}@endif</p>
             </div>
 
-            <livewire:property-actions :property="$property->id" />
+            <livewire:concierge-cta source="property_detail" :reference-id="$property->id" />
 
-            <livewire:kpr-calculator :price="$property->price" />
+            @if (config('concierge.legacy_ui', true))
+                <livewire:property-actions :property="$property->id" />
+            @endif
+
+            <livewire:kpr-calculator :price="$property->price" :property-id="$property->id" />
         </aside>
     </div>
 

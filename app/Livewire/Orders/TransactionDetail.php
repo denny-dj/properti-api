@@ -5,6 +5,7 @@ namespace App\Livewire\Orders;
 use App\Enums\TransactionStatus;
 use App\Exceptions\ApiException;
 use App\Models\Transaction;
+use App\Services\DeliverableService;
 use App\Services\PaymentService;
 use App\Services\TransactionService;
 use Illuminate\Support\Facades\Gate;
@@ -46,6 +47,20 @@ class TransactionDetail extends Component
         }
 
         return $this->redirect($transaction->redirect_url);
+    }
+
+    /** Pembeli: berkas desain sudah diterima dan sesuai -> dana dilepas ke saldo mitra. */
+    public function confirmDeliverable(): void
+    {
+        $transaction = $this->transaction();
+        $this->resetErrorBag('action');
+
+        try {
+            app(DeliverableService::class)->confirm($transaction, auth()->user());
+            $this->notice = 'Terima kasih! Penerimaan berkas dikonfirmasi dan dana dilepas ke mitra.';
+        } catch (ApiException $e) {
+            $this->addError('action', $e->getMessage());
+        }
     }
 
     /** Tarik status terbaru langsung dari Midtrans. */

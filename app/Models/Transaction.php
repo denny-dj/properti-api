@@ -16,6 +16,8 @@ class Transaction extends Model
         'installment_term', 'gateway_transaction_id', 'fraud_status',
         'needs_review', 'paid_at', 'expires_at', 'gateway_payload',
         'review_note', 'reviewed_by', 'reviewed_at',
+        'platform_fee', 'net_partner_amount', 'deliverable_link', 'deliverable_submitted_at',
+        'client_confirmed_at', 'portfolio_id', 'lead_id', 'issued_by',
     ];
 
     protected function casts(): array
@@ -28,6 +30,10 @@ class Transaction extends Model
             'paid_at' => 'datetime',
             'expires_at' => 'datetime',
             'reviewed_at' => 'datetime',
+            'deliverable_submitted_at' => 'datetime',
+            'client_confirmed_at' => 'datetime',
+            'platform_fee' => 'decimal:2',
+            'net_partner_amount' => 'decimal:2',
             'gateway_payload' => 'array',
         ];
     }
@@ -61,5 +67,20 @@ class Transaction extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function portfolio(): BelongsTo
+    {
+        return $this->belongsTo(ArchitectPortfolio::class, 'portfolio_id')->withTrashed();
+    }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(ConciergeLead::class, 'lead_id');
+    }
+
+    public function issuer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'issued_by');
     }
 }

@@ -1,6 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\BookingController as AdminBookingController;
+use App\Http\Controllers\Api\V1\Admin\InvoiceController as AdminInvoiceController;
+use App\Http\Controllers\Api\V1\Admin\LeadController as AdminLeadController;
+use App\Http\Controllers\Api\V1\Admin\RevenueController as AdminRevenueController;
+use App\Http\Controllers\Api\V1\ArchitectPortfolioController;
+use App\Http\Controllers\Api\V1\ConciergeController;
+use App\Http\Controllers\Api\V1\ContentController;
+use App\Http\Controllers\Api\V1\DeliverableController;
+use App\Http\Controllers\Api\V1\Partner\PortfolioController as PartnerPortfolioController;
 use App\Http\Controllers\Api\V1\Admin\PartnerController as AdminPartnerController;
 use App\Http\Controllers\Api\V1\Admin\PropertyController as AdminPropertyController;
 use App\Http\Controllers\Api\V1\Admin\TransactionController as AdminTransactionController;
@@ -51,6 +59,15 @@ Route::prefix('v1')->group(function () {
     Route::get('architect-services/{slug}', [ArchitectServiceController::class, 'show']);
     Route::get('architect-services/{slug}/slots', [ArchitectServiceController::class, 'slots']);
 
+    // ---------- Concierge: portofolio arsitek, prospek, konten ----------
+    Route::get('architect-portfolios', [ArchitectPortfolioController::class, 'index']);
+    Route::get('architect-portfolios/{slug}', [ArchitectPortfolioController::class, 'show']);
+    Route::post('concierge/generate-wa-link', [ConciergeController::class, 'generateWaLink'])->middleware('throttle:10,1');
+    Route::post('leads/kpr-interest', [ConciergeController::class, 'kprInterest'])->middleware('throttle:10,1');
+    Route::get('content/how-it-works', [ContentController::class, 'howItWorks']);
+    Route::get('content/promotions', [ContentController::class, 'promotions']);
+    Route::post('content/promotions/{id}/click', [ContentController::class, 'click'])->middleware('throttle:60,1');
+
     // Webhook payment gateway (publik; keaslian diverifikasi lewat signature)
     Route::post('payments/notification', [PaymentController::class, 'notification']);
 
@@ -75,6 +92,10 @@ Route::prefix('v1')->group(function () {
         // Detail & sinkronisasi transaksi (akses dicek oleh TransactionPolicy)
         Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
         Route::post('transactions/{transaction}/sync', [TransactionController::class, 'sync'])->middleware('throttle:20,1');
+
+        // Pembeli: konfirmasi penerimaan berkas desain (melepas dana ke saldo mitra)
+        Route::post('transactions/{transaction}/confirm-deliverable', [DeliverableController::class, 'confirm'])
+            ->middleware(['role:user', 'throttle:20,1']);
 
         // Buyer / klien
         Route::middleware('role:user')->group(function () {
@@ -114,6 +135,13 @@ Route::prefix('v1')->group(function () {
 
         // Partner (Architect): layanan, jadwal, pesanan masuk
         Route::prefix('partner')->middleware(['role:partner', 'partner.approved:architect'])->group(function () {
+            // Portofolio berbasis RAB + serah terima berkas
+            Route::apiResource('architect-portfolios', PartnerPortfolioController::class)
+                ->parameters(['architect-portfolios' => 'id'])
+                ->except(['show']);
+            Route::post('transactions/{transaction}/submit-deliverable', [DeliverableController::class, 'submit'])->middleware('throttle:30,1');
+            Route::get('balance', [DeliverableController::class, 'balance']);
+
             Route::get('availabilities', [AvailabilityController::class, 'show']);
             Route::put('availabilities', [AvailabilityController::class, 'update']);
 
@@ -153,8 +181,16 @@ Route::prefix('v1')->group(function () {
                 Route::get('bookings/{booking}', [AdminBookingController::class, 'show']);
             });
 
+            // Cockpit concierge (garda depan)
+            Route::middleware('permission:concierge.manage')->group(function () {
+                Route::get('concierge/leads', [AdminLeadController::class, 'index']);
+                Route::put('concierge/leads/{id}/status', [AdminLeadController::class, 'updateStatus']);
+                Route::post('invoices/quick-booking', [AdminInvoiceController::class, 'quickBooking'])->middleware('throttle:30,1');
+            });
+
             Route::middleware('permission:transactions.view')->group(function () {
                 Route::get('transactions', [AdminTransactionController::class, 'index']);
+                Route::get('revenue/summary', [AdminRevenueController::class, 'summary']);
                 Route::get('transactions/summary', [AdminTransactionController::class, 'summary']); // sebelum {transaction}
                 Route::get('transactions/{transaction}', [AdminTransactionController::class, 'show']);
             });

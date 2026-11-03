@@ -53,6 +53,28 @@
         @endif
     </div>
 
+    @if (in_array($transaction->type->value, ['architect_blueprint', 'architect_custom'], true) && $transaction->status->value === 'paid')
+        <div class="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5 text-sm">
+            <h2 class="font-semibold text-green-900">Berkas desain</h2>
+            @if (! $transaction->deliverable_link)
+                <p class="mt-1 text-green-800">Pembayaran diterima. Menunggu arsitek mengirim tautan berkas (DED, 3D, RAB).</p>
+            @else
+                <p class="mt-1 text-green-800">Periksa isi folder berikut. Tekan konfirmasi hanya bila berkas sudah lengkap dan sesuai; konfirmasi melepas dana ke arsitek.</p>
+                <a href="{{ $transaction->deliverable_link }}" target="_blank" rel="noopener noreferrer nofollow" class="mt-2 inline-block break-all font-medium text-blue-700 underline">{{ $transaction->deliverable_link }}</a>
+
+                @if ($transaction->client_confirmed_at)
+                    <p class="mt-3 font-medium text-green-900">Dikonfirmasi pada {{ $transaction->client_confirmed_at->format('d/m/Y H:i') }}.</p>
+                @elseif ($transaction->user_id === auth()->id())
+                    <button type="button" wire:click="confirmDeliverable" wire:loading.attr="disabled"
+                            wire:confirm="Konfirmasi bahwa berkas sudah diterima dan sesuai? Dana akan dilepas ke arsitek."
+                            class="mt-3 rounded-lg bg-green-600 px-5 py-2.5 font-medium text-white hover:bg-green-700">
+                        Konfirmasi Penerimaan Berkas
+                    </button>
+                @endif
+            @endif
+        </div>
+    @endif
+
     <div class="mt-5 flex flex-wrap gap-3">
         @if ($isPending && ! $expired)
             <button type="button" wire:click="continuePay" wire:loading.attr="disabled" class="rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700">Lanjutkan pembayaran</button>

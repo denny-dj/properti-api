@@ -32,6 +32,15 @@ use App\Observers\ArchitectBookingObserver;
 use App\Observers\PartnerProfileObserver;
 use App\Observers\PropertyObserver;
 use App\Observers\TransactionObserver;
+use App\Observers\ConciergeTransactionObserver;
+use App\Repositories\Contracts\AdBannerRepositoryInterface;
+use App\Repositories\Contracts\ArchitectPortfolioRepositoryInterface;
+use App\Repositories\Contracts\ConciergeLeadRepositoryInterface;
+use App\Repositories\Contracts\ConciergeTransactionRepositoryInterface;
+use App\Repositories\Eloquent\AdBannerRepository;
+use App\Repositories\Eloquent\ArchitectPortfolioRepository;
+use App\Repositories\Eloquent\ConciergeLeadRepository;
+use App\Repositories\Eloquent\ConciergeTransactionRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -49,6 +58,11 @@ class RepositoryServiceProvider extends ServiceProvider
         ConversationRepositoryInterface::class => ConversationRepository::class,
         MessageRepositoryInterface::class => MessageRepository::class,
         TransactionRepositoryInterface::class => TransactionRepository::class,
+        // Concierge
+        ArchitectPortfolioRepositoryInterface::class => ArchitectPortfolioRepository::class,
+        ConciergeLeadRepositoryInterface::class => ConciergeLeadRepository::class,
+        AdBannerRepositoryInterface::class => AdBannerRepository::class,
+        ConciergeTransactionRepositoryInterface::class => ConciergeTransactionRepository::class,
     ];
 
     /** Observer: kirim notifikasi email saat status penting berubah (dari API, web, maupun admin). */
@@ -58,5 +72,6 @@ class RepositoryServiceProvider extends ServiceProvider
         Property::observe(PropertyObserver::class);
         ArchitectBooking::observe(ArchitectBookingObserver::class);
         Transaction::observe(TransactionObserver::class);
+        Transaction::observe(ConciergeTransactionObserver::class);
     }
 }

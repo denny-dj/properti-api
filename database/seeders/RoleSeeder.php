@@ -17,6 +17,7 @@ class RoleSeeder extends Seeder
         'properties.verify',
         'bookings.view',
         'transactions.view',
+        'concierge.manage',
     ];
 
     public function run(): void

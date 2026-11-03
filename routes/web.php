@@ -3,10 +3,13 @@
 use App\Http\Controllers\Web\ArchitectPageController;
 use App\Http\Controllers\Web\ChatPageController;
 use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\HowItWorksController;
 use App\Http\Controllers\Web\LogoutController;
 use App\Http\Controllers\Web\OrderPageController;
 use App\Http\Controllers\Web\PaymentFinishController;
 use App\Http\Controllers\Web\Partner\PropertyPageController as PartnerPropertyPageController;
+use App\Http\Controllers\Web\PortfolioPageController;
+use App\Http\Controllers\Web\PromoClickController;
 use App\Http\Controllers\Web\PropertyPageController;
 use App\Http\Controllers\Web\VerifyEmailController;
 use App\Http\Middleware\EnsurePartnerApprovedWeb;
@@ -23,6 +26,12 @@ Route::view('/arsitek', 'pages.architects')->name('architects.index');
 Route::get('/arsitek/{slug}', [ArchitectPageController::class, 'show'])->name('architects.show');
 
 Route::view('/kpr', 'pages.kpr')->name('kpr');
+
+// Concierge: portofolio arsitek berbasis RAB, cara kerja, klik iklan
+Route::view('/portofolio', 'pages.portfolios')->name('portfolios.index');
+Route::get('/portofolio/{slug}', [PortfolioPageController::class, 'show'])->name('portfolios.show');
+Route::get('/cara-kerja', HowItWorksController::class)->name('how-it-works');
+Route::get('/promo/{id}', PromoClickController::class)->whereNumber('id')->middleware('throttle:60,1')->name('promo.click');
 
 // ---------- Autentikasi (sesi/cookie) ----------
 Route::middleware('guest')->group(function () {

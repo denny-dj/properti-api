@@ -67,25 +67,20 @@ class PreflightCommand extends Command
         $this->rows[] = ['PERINGATAN', $check, $note];
     }
 
-    // private function fail(string $check, string $note): void
-    // {
-    //     $this->failures++;
-    //     $this->rows[] = ['GAGAL', $check, $note];
-    // }
-    private function recordFail(string $check, string $note): void
-{
-    $this->failures++;
-    $this->rows[] = ['GAGAL', $check, $note];
-}
+    private function failCheck(string $check, string $note): void
+    {
+        $this->failures++;
+        $this->rows[] = ['GAGAL', $check, $note];
+    }
 
     private function checkApp(): void
     {
         config('app.key')
             ? $this->pass('APP_KEY')
-            : $this->recordFail('APP_KEY', 'Belum diatur. Jalankan php artisan key:generate.');
+            : $this->failCheck('APP_KEY', 'Belum diatur. Jalankan php artisan key:generate.');
 
         config('app.debug')
-            ? $this->recordFail('APP_DEBUG', 'APP_DEBUG=true membocorkan detail error. Ubah menjadi false.')
+            ? $this->failCheck('APP_DEBUG', 'APP_DEBUG=true membocorkan detail error. Ubah menjadi false.')
             : $this->pass('APP_DEBUG');
 
         config('app.env') === 'production'
@@ -111,7 +106,7 @@ class PreflightCommand extends Command
             DB::connection()->getPdo();
             $this->pass('Koneksi database');
         } catch (Throwable $e) {
-            $this->recordFail('Koneksi database', 'Tidak dapat terhubung: '.$e->getMessage());
+            $this->failCheck('Koneksi database', 'Tidak dapat terhubung: '.$e->getMessage());
 
             return false;
         }
@@ -124,7 +119,7 @@ class PreflightCommand extends Command
 
             $pending === []
                 ? $this->pass('Migrasi database')
-                : $this->recordFail('Migrasi database', count($pending).' migrasi belum dijalankan. Jalankan php artisan migrate --force.');
+                : $this->failCheck('Migrasi database', count($pending).' migrasi belum dijalankan. Jalankan php artisan migrate --force.');
         } catch (Throwable $e) {
             $this->caution('Migrasi database', 'Tidak dapat diperiksa: '.$e->getMessage());
         }
@@ -132,9 +127,9 @@ class PreflightCommand extends Command
         try {
             Role::where('name', 'admin')->exists()
                 ? $this->pass('Peran & izin')
-                : $this->recordFail('Peran & izin', 'Peran belum dibuat. Jalankan php artisan db:seed --class=RoleSeeder --force.');
+                : $this->failCheck('Peran & izin', 'Peran belum dibuat. Jalankan php artisan db:seed --class=RoleSeeder --force.');
         } catch (Throwable) {
-            $this->recordFail('Peran & izin', 'Tabel peran tidak ditemukan. Jalankan migrasi.');
+            $this->failCheck('Peran & izin', 'Tabel peran tidak ditemukan. Jalankan migrasi.');
         }
 
         return true;
@@ -148,7 +143,7 @@ class PreflightCommand extends Command
             : $this->pass('Antrean (QUEUE_CONNECTION)', (string) $queue.' (pastikan queue worker berjalan)');
 
         in_array(config('mail.default'), ['log', 'array'], true)
-            ? $this->recordFail('Email (MAIL_MAILER)', 'Mailer "'.config('mail.default').'" tidak mengirim email sungguhan. Atur SMTP/penyedia email.')
+            ? $this->failCheck('Email (MAIL_MAILER)', 'Mailer "'.config('mail.default').'" tidak mengirim email sungguhan. Atur SMTP/penyedia email.')
             : $this->pass('Email (MAIL_MAILER)', (string) config('mail.default'));
 
         in_array((string) config('mail.from.address'), ['', 'hello@example.com'], true)
@@ -167,14 +162,14 @@ class PreflightCommand extends Command
 
         file_exists(public_path('storage'))
             ? $this->pass('Tautan storage')
-            : $this->recordFail('Tautan storage', 'public/storage belum ada. Jalankan php artisan storage:link.');
+            : $this->failCheck('Tautan storage', 'public/storage belum ada. Jalankan php artisan storage:link.');
 
         if (file_exists(public_path('hot'))) {
-            $this->recordFail('Aset front-end', 'public/hot ada (server dev Vite). Hapus berkasnya dan jalankan npm run build.');
+            $this->failCheck('Aset front-end', 'public/hot ada (server dev Vite). Hapus berkasnya dan jalankan npm run build.');
         } elseif (file_exists(public_path('build/manifest.json'))) {
             $this->pass('Aset front-end');
         } else {
-            $this->recordFail('Aset front-end', 'public/build belum ada. Jalankan npm run build.');
+            $this->failCheck('Aset front-end', 'public/build belum ada. Jalankan npm run build.');
         }
     }
 
@@ -184,9 +179,9 @@ class PreflightCommand extends Command
         $isProduction = (bool) config('payments.midtrans.is_production');
 
         if ($key === '') {
-            $this->recordFail('Midtrans: server key', 'MIDTRANS_SERVER_KEY belum diisi.');
+            $this->failCheck('Midtrans: server key', 'MIDTRANS_SERVER_KEY belum diisi.');
         } elseif ($isProduction && str_starts_with($key, 'SB-')) {
-            $this->recordFail('Midtrans: kunci', 'Mode produksi aktif tetapi memakai kunci sandbox (SB-...).');
+            $this->failCheck('Midtrans: kunci', 'Mode produksi aktif tetapi memakai kunci sandbox (SB-...).');
         } elseif (! $isProduction && ! str_starts_with($key, 'SB-')) {
             $this->caution('Midtrans: kunci', 'Kunci produksi dipakai dengan MIDTRANS_IS_PRODUCTION=false.');
         } elseif (! $isProduction) {
@@ -206,6 +201,11 @@ class PreflightCommand extends Command
         config('services.google_maps.browser_key')
             ? $this->pass('Google Maps: key browser')
             : $this->caution('Google Maps: key browser', 'GOOGLE_MAPS_BROWSER_KEY kosong; peta interaktif tidak tampil.');
+
+        $wa = preg_replace('/\D+/', '', (string) config('concierge.admin_wa_number')) ?? '';
+        preg_match('/^62\d{8,13}$/', $wa)
+            ? $this->pass('WhatsApp admin (concierge)')
+            : $this->failCheck('WhatsApp admin (concierge)', 'ADMIN_WA_NUMBER belum valid (format 62812xxxxxxx). Tautan WhatsApp concierge tidak berfungsi.');
     }
 
     private function checkAccounts(): void
@@ -213,11 +213,11 @@ class PreflightCommand extends Command
         $demo = ['admin@example.com', 'buyer@example.com', 'seller@example.com', 'architect@example.com'];
 
         User::whereIn('email', $demo)->exists()
-            ? $this->recordFail('Akun demo', 'Akun demo (@example.com, password "password") masih ada. Hapus sebelum go-live.')
+            ? $this->failCheck('Akun demo', 'Akun demo (@example.com, password "password") masih ada. Hapus sebelum go-live.')
             : $this->pass('Akun demo');
 
         User::role('admin')->exists()
             ? $this->pass('Administrator')
-            : $this->recordFail('Administrator', 'Belum ada administrator. Jalankan php artisan app:create-admin email@anda.com.');
+            : $this->failCheck('Administrator', 'Belum ada administrator. Jalankan php artisan app:create-admin email@anda.com.');
     }
 }

@@ -119,6 +119,23 @@ class ArchitectPortfolioService
         $this->portfolios->delete($portfolio); // soft delete
     }
 
+    /** Portofolio milik arsitek ini (beserta foto) atau ApiException 404. */
+    public function findOwnedOrFail(User $architect, int $id): ArchitectPortfolio
+    {
+        return $this->owned($architect, $id);
+    }
+
+    public function setCover(User $architect, int $portfolioId, int $imageId): void
+    {
+        $portfolio = $this->owned($architect, $portfolioId);
+
+        if (! $portfolio->images->contains('id', $imageId)) {
+            throw new ApiException('Foto tidak ditemukan.', 404);
+        }
+
+        $this->portfolios->setCover($portfolio, $imageId);
+    }
+
     // ------------------------------------------------------------------
 
     private function owned(User $architect, int $id): ArchitectPortfolio

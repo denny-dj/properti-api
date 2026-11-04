@@ -15,6 +15,7 @@ class AdminStatsService
             'partners' => DB::table('partner_profiles')->where('verification_status', 'pending')->count(),
             'properties' => DB::table('properties')->whereNull('deleted_at')->where('status', 'pending_review')->count(),
             'transactions' => DB::table('transactions')->where('needs_review', true)->count(),
+            'leads' => DB::table('concierge_leads')->where('status', 'new')->count(),
         ];
     }
 

@@ -56,7 +56,30 @@
         </div>
     @endif
 
-    @if ($architect)
+    @if ($architect && $design)
+        <div>
+            <div class="flex items-end justify-between">
+                <h2 class="text-lg font-semibold">Desain &amp; serah terima</h2>
+                <a href="{{ route('partner.portfolios.create') }}" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Tambah portofolio</a>
+            </div>
+            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                <a href="{{ route('partner.design-orders', ['stage' => 'awaiting_link']) }}" class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <p class="text-2xl font-bold text-amber-800">{{ $design['awaiting'] }}</p>
+                    <p class="text-xs text-amber-800">Perlu kirim berkas</p>
+                </a>
+                <div class="rounded-xl border border-gray-200 bg-white p-4">
+                    <p class="text-lg font-bold text-amber-700"><x-rupiah :value="$design['balance']['pending_release']" /></p>
+                    <p class="text-xs text-gray-500">Menunggu dilepas (belum dikonfirmasi pembeli)</p>
+                </div>
+                <div class="rounded-xl border border-gray-200 bg-white p-4">
+                    <p class="text-lg font-bold text-green-700"><x-rupiah :value="$design['balance']['available']" /></p>
+                    <p class="text-xs text-gray-500">Siap dicairkan</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($architect && config('concierge.legacy_ui', true))
         <div>
             <h2 class="text-lg font-semibold">Konsultasi</h2>
             <div class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">

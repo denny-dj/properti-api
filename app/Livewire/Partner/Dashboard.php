@@ -4,6 +4,7 @@ namespace App\Livewire\Partner;
 
 use App\Models\ArchitectBooking;
 use App\Models\Property;
+use App\Services\PartnerBalanceService;
 use App\Services\PartnerStatsService;
 use Livewire\Component;
 
@@ -27,6 +28,10 @@ class Dashboard extends Component
             'seller' => $isSeller ? $stats->seller($user) : null,
             'architect' => $isArchitect ? $stats->architect($user) : null,
             'revenue' => $stats->revenue($user),
+            'design' => $isArchitect ? [
+                'balance' => app(PartnerBalanceService::class)->summary($user),
+                'awaiting' => app(PartnerBalanceService::class)->awaitingCount($user),
+            ] : null,
             'recentProperties' => $isSeller
                 ? Property::where('partner_id', $user->id)->latest()->limit(5)->get()
                 : collect(),

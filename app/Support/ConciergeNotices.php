@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\PartnerPayout;
 use App\Models\Transaction;
 use App\Notifications\EventNotification;
 
@@ -42,6 +43,23 @@ final class ConciergeNotices
             'Periksa berkas',
             route('transactions.show', $t->code),
         );
+    }
+
+    /** Ke mitra: admin sudah mentransfer pencairan. */
+    public static function payoutRecorded(PartnerPayout $payout): EventNotification
+    {
+        $lines = [
+            'Admin telah mencatat pencairan saldo Anda sebesar '.self::rp($payout->amount).'.',
+            'Tanggal: '.$payout->paid_at->format('d/m/Y H:i'),
+        ];
+
+        if ($payout->reference) {
+            $lines[] = 'Referensi transfer: '.$payout->reference;
+        }
+
+        $lines[] = 'Bila dana belum masuk dalam 1x24 jam kerja, hubungi admin dengan menyertakan referensi di atas.';
+
+        return new EventNotification('Pencairan saldo dicatat', $lines, 'Lihat pesanan desain', route('partner.design-orders'));
     }
 
     /** Ke mitra: dana dilepas. */

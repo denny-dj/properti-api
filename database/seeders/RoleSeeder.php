@@ -18,6 +18,7 @@ class RoleSeeder extends Seeder
         'bookings.view',
         'transactions.view',
         'concierge.manage',
+        'payouts.manage',
     ];
 
     public function run(): void

@@ -27,6 +27,24 @@
         </a>
     </div>
 
+    {{-- Concierge --}}
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <a href="{{ route('admin.leads', ['status' => 'new']) }}" class="rounded-2xl border p-5 {{ ($badges['leads'] ?? 0) > 0 ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-white' }}">
+            <p class="text-3xl font-bold">{{ $badges['leads'] ?? 0 }}</p>
+            <p class="text-sm text-gray-600">Prospek baru (WhatsApp &amp; KPR)</p>
+        </a>
+        @if ($outstanding !== null)
+            <a href="{{ route('admin.payouts') }}" class="rounded-2xl border border-gray-200 bg-white p-5">
+                <p class="text-xl font-bold text-amber-700"><x-rupiah :value="$outstanding" /></p>
+                <p class="mt-1 text-sm text-gray-600">Saldo mitra belum dicairkan</p>
+            </a>
+        @endif
+        <a href="{{ route('admin.invoices') }}" class="rounded-2xl border border-blue-200 bg-blue-50 p-5">
+            <p class="text-lg font-bold text-blue-800">Invoice cepat</p>
+            <p class="text-sm text-blue-800">Buat tautan pembayaran untuk dikirim via WhatsApp</p>
+        </a>
+    </div>
+
     {{-- Pendapatan --}}
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="rounded-2xl border border-gray-200 bg-white p-5"><p class="text-sm text-gray-500">Total pembayaran lunas</p><p class="mt-1 text-xl font-bold text-green-700"><x-rupiah :value="$overview['revenue']['paid_total']" /></p></div>

@@ -19,6 +19,14 @@
     }
     if ($admin->can('transactions.view')) {
         $items[] = ['Transaksi', route('admin.transactions'), ['admin.transactions'], $badges['transactions']];
+        $items[] = ['Pendapatan', route('admin.revenue'), ['admin.revenue'], 0];
+    }
+    if ($admin->can('concierge.manage')) {
+        $items[] = ['Prospek', route('admin.leads'), ['admin.leads'], $badges['leads'] ?? 0];
+        $items[] = ['Invoice cepat', route('admin.invoices'), ['admin.invoices'], 0];
+    }
+    if ($admin->can('payouts.manage')) {
+        $items[] = ['Pencairan mitra', route('admin.payouts'), ['admin.payouts'], 0];
     }
 @endphp
 <x-layouts.app :title="$title">

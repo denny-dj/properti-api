@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\PartnerProfile;
 use App\Models\Property;
 use App\Services\AdminStatsService;
+use App\Services\PayoutService;
 use Livewire\Component;
 
 class Dashboard extends Component
@@ -16,6 +17,7 @@ class Dashboard extends Component
         return view('livewire.admin.dashboard', [
             'badges' => $stats->badges(),
             'overview' => $stats->overview(),
+            'outstanding' => auth()->user()?->can('payouts.manage') ? app(PayoutService::class)->outstandingTotal() : null,
             'pendingPartners' => PartnerProfile::with('user')
                 ->where('verification_status', 'pending')->latest()->limit(5)->get(),
             'pendingProperties' => Property::with('partner')

@@ -6,6 +6,7 @@ use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
 use App\Models\Transaction;
 use App\Repositories\Contracts\ConciergeTransactionRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
 class ConciergeTransactionRepository implements ConciergeTransactionRepositoryInterface
@@ -23,6 +24,36 @@ class ConciergeTransactionRepository implements ConciergeTransactionRepositoryIn
             ->where(fn (Builder $q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->latest('id')
             ->first();
+    }
+
+    public function paginateDesignOrders(int $partnerId, ?string $stage = null, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = Transaction::query()
+            ->with(['payer', 'portfolio'])
+            ->where('payee_id', $partnerId)
+            ->whereIn('type', self::DELIVERABLE_TYPES);
+
+        match ($stage) {
+            'unpaid' => $query->where('status', TransactionStatus::Pending->value)
+                ->where(fn (Builder $q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now())),
+            'awaiting_link' => $query->where('status', TransactionStatus::Paid->value)->whereNull('deliverable_link'),
+            'awaiting_confirmation' => $query->where('status', TransactionStatus::Paid->value)
+                ->whereNotNull('deliverable_link')->whereNull('client_confirmed_at'),
+            'released' => $query->where('status', TransactionStatus::Paid->value)->whereNotNull('client_confirmed_at'),
+            default => null,
+        };
+
+        return $query->latest('id')->paginate($perPage)->withQueryString();
+    }
+
+    public function countAwaitingDeliverable(int $partnerId): int
+    {
+        return Transaction::query()
+            ->where('payee_id', $partnerId)
+            ->whereIn('type', self::DELIVERABLE_TYPES)
+            ->where('status', TransactionStatus::Paid->value)
+            ->whereNull('deliverable_link')
+            ->count();
     }
 
     public function hasOpenTransactions(int $portfolioId): bool
@@ -58,6 +89,26 @@ class ConciergeTransactionRepository implements ConciergeTransactionRepositoryIn
             'pending_release' => (float) ($row->pending_release ?? 0),
             'transactions' => (int) ($row->trx_count ?? 0),
         ];
+    }
+
+    public function balancesByPartner(): array
+    {
+        return Transaction::query()
+            ->where('status', TransactionStatus::Paid->value)
+            ->whereIn('type', self::DELIVERABLE_TYPES)
+            ->whereNotNull('payee_id')
+            ->selectRaw(
+                'payee_id, '
+                .'COALESCE(SUM(CASE WHEN client_confirmed_at IS NOT NULL THEN net_partner_amount ELSE 0 END), 0) as released, '
+                .'COALESCE(SUM(CASE WHEN client_confirmed_at IS NULL THEN net_partner_amount ELSE 0 END), 0) as pending_release'
+            )
+            ->groupBy('payee_id')
+            ->get()
+            ->mapWithKeys(fn ($row) => [(int) $row->payee_id => [
+                'released' => (float) $row->released,
+                'pending_release' => (float) $row->pending_release,
+            ]])
+            ->all();
     }
 
     public function revenueByType(?string $from, ?string $to): array

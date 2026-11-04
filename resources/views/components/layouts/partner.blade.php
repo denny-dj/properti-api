@@ -12,9 +12,14 @@
     }
 
     if ($approved && $type === 'architect') {
-        $items[] = ['Layanan saya', route('partner.services'), ['partner.services']];
-        $items[] = ['Jadwal kerja', route('partner.availability'), ['partner.availability']];
-        $items[] = ['Pesanan masuk', route('partner.bookings'), ['partner.bookings']];
+        $items[] = ['Portofolio saya', route('partner.portfolios.index'), ['partner.portfolios.*']];
+        $items[] = ['Pesanan desain', route('partner.design-orders'), ['partner.design-orders']];
+
+        if (config('concierge.legacy_ui', true)) {
+            $items[] = ['Layanan saya', route('partner.services'), ['partner.services']];
+            $items[] = ['Jadwal kerja', route('partner.availability'), ['partner.availability']];
+            $items[] = ['Pesanan masuk', route('partner.bookings'), ['partner.bookings']];
+        }
     }
 
     $items[] = ['Pembayaran masuk', route('partner.transactions'), ['partner.transactions']];

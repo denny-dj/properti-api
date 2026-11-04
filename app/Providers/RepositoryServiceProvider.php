@@ -36,6 +36,8 @@ use App\Observers\ConciergeTransactionObserver;
 use App\Repositories\Contracts\AdBannerRepositoryInterface;
 use App\Repositories\Contracts\ArchitectPortfolioRepositoryInterface;
 use App\Repositories\Contracts\ConciergeLeadRepositoryInterface;
+use App\Repositories\Contracts\PartnerPayoutRepositoryInterface;
+use App\Repositories\Eloquent\PartnerPayoutRepository;
 use App\Repositories\Contracts\ConciergeTransactionRepositoryInterface;
 use App\Repositories\Eloquent\AdBannerRepository;
 use App\Repositories\Eloquent\ArchitectPortfolioRepository;
@@ -63,6 +65,7 @@ class RepositoryServiceProvider extends ServiceProvider
         ConciergeLeadRepositoryInterface::class => ConciergeLeadRepository::class,
         AdBannerRepositoryInterface::class => AdBannerRepository::class,
         ConciergeTransactionRepositoryInterface::class => ConciergeTransactionRepository::class,
+        PartnerPayoutRepositoryInterface::class => PartnerPayoutRepository::class,
     ];
 
     /** Observer: kirim notifikasi email saat status penting berubah (dari API, web, maupun admin). */

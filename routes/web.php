@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\HowItWorksController;
 use App\Http\Controllers\Web\LogoutController;
 use App\Http\Controllers\Web\OrderPageController;
 use App\Http\Controllers\Web\PaymentFinishController;
+use App\Http\Controllers\Web\Partner\PortfolioPageController as PartnerPortfolioPageController;
 use App\Http\Controllers\Web\Partner\PropertyPageController as PartnerPropertyPageController;
 use App\Http\Controllers\Web\PortfolioPageController;
 use App\Http\Controllers\Web\PromoClickController;
@@ -88,6 +89,12 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
 
     // Khusus arsitek yang sudah diverifikasi
     Route::middleware(EnsurePartnerApprovedWeb::class.':architect')->group(function () {
+        // Portofolio berbasis RAB + serah terima berkas desain
+        Route::view('/portofolio', 'pages.partner.portfolios')->name('portfolios.index');
+        Route::view('/portofolio/baru', 'pages.partner.portfolio-create')->name('portfolios.create');
+        Route::get('/portofolio/{id}/ubah', [PartnerPortfolioPageController::class, 'edit'])->whereNumber('id')->name('portfolios.edit');
+        Route::view('/pesanan-desain', 'pages.partner.design-orders')->name('design-orders');
+
         Route::view('/layanan', 'pages.partner.services')->name('services');
         Route::view('/jadwal', 'pages.partner.availability')->name('availability');
         Route::view('/pesanan', 'pages.partner.bookings')->name('bookings');
@@ -103,4 +110,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::view('/pengguna', 'pages.admin.users')->middleware('permission:users.manage')->name('users');
     Route::view('/pesanan', 'pages.admin.bookings')->middleware('permission:bookings.view')->name('bookings');
     Route::view('/transaksi', 'pages.admin.transactions')->middleware('permission:transactions.view')->name('transactions');
+    Route::view('/pendapatan', 'pages.admin.revenue')->middleware('permission:transactions.view')->name('revenue');
+
+    // Cockpit concierge (garda depan)
+    Route::view('/prospek', 'pages.admin.leads')->middleware('permission:concierge.manage')->name('leads');
+    Route::view('/invoice-cepat', 'pages.admin.invoices')->middleware('permission:concierge.manage')->name('invoices');
+    Route::view('/pencairan', 'pages.admin.payouts')->middleware('permission:payouts.manage')->name('payouts');
 });

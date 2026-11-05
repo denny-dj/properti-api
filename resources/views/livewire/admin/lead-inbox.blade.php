@@ -2,7 +2,7 @@
     $statusLabels = ['new' => ['Baru', 'bg-green-100 text-green-800'], 'contacted' => ['Dihubungi', 'bg-blue-100 text-blue-800'],
         'surveying' => ['Survei', 'bg-indigo-100 text-indigo-800'], 'committed' => ['Sepakat', 'bg-emerald-100 text-emerald-800'],
         'lost' => ['Batal', 'bg-gray-200 text-gray-700']];
-    $sourceLabels = ['property_detail' => 'Detail properti', 'architect_portfolio' => 'Portofolio arsitek', 'kpr_calculator' => 'Kalkulator KPR'];
+    $sourceLabels = ['property_detail' => 'Detail properti', 'architect_portfolio' => 'Portofolio arsitek', 'kpr_calculator' => 'Kalkulator KPR', 'promotion' => 'Banner promo'];
     $input = 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm';
 @endphp
 <div class="space-y-5">

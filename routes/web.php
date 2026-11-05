@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\ArchitectPageController;
 use App\Http\Controllers\Web\ChatPageController;
+use App\Http\Controllers\Web\ConciergeRedirectController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\HowItWorksController;
 use App\Http\Controllers\Web\LogoutController;
@@ -34,6 +35,8 @@ Route::view('/kpr', 'pages.kpr')->name('kpr');
 Route::view('/portofolio', 'pages.portfolios')->name('portfolios.index');
 Route::get('/portofolio/{slug}', [PortfolioPageController::class, 'show'])->name('portfolios.show');
 Route::get('/cara-kerja', HowItWorksController::class)->name('how-it-works');
+// Tombol "Tanya Admin" pada kartu & hero: catat prospek lalu buka WhatsApp admin (POST + CSRF, tanpa efek samping lewat GET)
+Route::post('/konsultasi', ConciergeRedirectController::class)->middleware('throttle:10,1')->name('concierge.redirect');
 Route::get('/promo/{id}', PromoClickController::class)->whereNumber('id')->middleware('throttle:60,1')->name('promo.click');
 
 // ---------- Autentikasi (sesi/cookie) ----------

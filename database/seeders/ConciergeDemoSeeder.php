@@ -8,6 +8,7 @@ use App\Models\ArchitectPortfolio;
 use App\Models\PortfolioImage;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -91,9 +92,28 @@ class ConciergeDemoSeeder extends Seeder
                     'end_date' => now()->addMonths(2)->toDateString(),
                 ])->save();
             }
+
+            $banner->fill($this->creative($title))->save();
         }
 
         $this->command?->info('Demo concierge siap: 6 portofolio dan 3 banner.');
+    }
+
+    /** Teks promo untuk hero (hanya bila kolomnya sudah dimigrasi). */
+    private function creative(string $title): array
+    {
+        if (! Schema::hasColumn('ad_banners', 'subtitle')) {
+            return [];
+        }
+
+        return match (true) {
+            str_contains($title, 'cicilan') => [
+                'subtitle' => 'Cluster siap huni dengan DP ringan dan pendampingan KPR dari tim concierge kami.',
+                'price_label' => 'Mulai Rp 850 Jt · Unit terbatas',
+                'badge_label' => 'Featured Developer',
+            ],
+            default => [],
+        };
     }
 
     private function image(string $label, int $w, int $h, array $rgb, int $variant): string

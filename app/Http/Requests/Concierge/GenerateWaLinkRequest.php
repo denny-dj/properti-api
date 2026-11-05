@@ -18,7 +18,7 @@ class GenerateWaLinkRequest extends FormRequest
     {
         return [
             'source' => ['required', Rule::enum(LeadSource::class)],
-            'reference_id' => ['nullable', 'integer', 'min:1', 'required_if:source,property_detail', 'required_if:source,architect_portfolio'],
+            'reference_id' => ['nullable', 'integer', 'min:1', 'required_if:source,property_detail', 'required_if:source,architect_portfolio', 'required_if:source,promotion'],
             'customer_name' => ['nullable', 'string', 'max:100'],
             'customer_phone' => ['nullable', 'string', 'regex:/^(\+62|62|0)8[0-9]{8,12}$/'],
             'estimated_budget' => ['nullable', 'integer', 'min:0', 'max:99999999999999'],

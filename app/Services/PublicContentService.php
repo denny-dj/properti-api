@@ -80,6 +80,24 @@ class PublicContentService
         return $banners;
     }
 
+    /**
+     * Satu banner untuk hero beranda (placement top_hero). Bila ada beberapa yang aktif, dipilih acak agar
+     * tayangan adil antar pengiklan. Hanya banner yang benar-benar tampil yang dihitung impression-nya.
+     */
+    public function heroBanner(): ?AdBanner
+    {
+        $banners = $this->banners->live('top_hero');
+
+        if ($banners->isEmpty()) {
+            return null;
+        }
+
+        $banner = $banners->random();
+        $this->banners->incrementImpressions([$banner->id]);
+
+        return $banner;
+    }
+
     /** Mencatat klik dan mengembalikan banner (untuk target_url). */
     public function trackClick(int $id): AdBanner
     {

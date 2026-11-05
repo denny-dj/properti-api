@@ -52,7 +52,7 @@ class QuickInvoice extends Component
         $this->leadCode = $model->lead_code;
         $this->leadInfo = trim(($model->customer_name ?: 'Tanpa nama').' · '.($model->customer_phone ?: 'tanpa nomor'));
 
-        if ($model->reference_id !== null) {
+        if ($model->reference_id !== null && $model->source !== LeadSource::Promotion) {
             $this->itemId = (string) $model->reference_id;
 
             if ($model->source === LeadSource::ArchitectPortfolio) {

@@ -7,4 +7,5 @@ enum LeadSource: string
     case PropertyDetail = 'property_detail';
     case ArchitectPortfolio = 'architect_portfolio';
     case KprCalculator = 'kpr_calculator';
+    case Promotion = 'promotion';             // tombol WhatsApp pada banner promo mitra
 }

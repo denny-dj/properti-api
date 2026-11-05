@@ -13,7 +13,7 @@ class AdBanner extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'placement', 'banner_image', 'target_url',
+        'title', 'subtitle', 'price_label', 'badge_label', 'placement', 'banner_image', 'target_url',
         'impression_count', 'click_count', 'is_active', 'start_date', 'end_date',
     ];
 

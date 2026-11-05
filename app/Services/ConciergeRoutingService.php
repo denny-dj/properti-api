@@ -9,6 +9,7 @@ use App\Enums\PortfolioStatus;
 use App\Enums\PropertyStatus;
 use App\Exceptions\ApiException;
 use App\Models\ConciergeLead;
+use App\Repositories\Contracts\AdBannerRepositoryInterface;
 use App\Repositories\Contracts\ArchitectPortfolioRepositoryInterface;
 use App\Repositories\Contracts\ConciergeLeadRepositoryInterface;
 use App\Repositories\Contracts\PropertyRepositoryInterface;
@@ -22,6 +23,7 @@ class ConciergeRoutingService
         private ConciergeLeadRepositoryInterface $leads,
         private PropertyRepositoryInterface $properties,
         private ArchitectPortfolioRepositoryInterface $portfolios,
+        private AdBannerRepositoryInterface $banners,
     ) {
     }
 
@@ -135,6 +137,7 @@ class ConciergeRoutingService
             LeadSource::PropertyDetail => $this->propertyItem($id ?? throw new ApiException('reference_id properti wajib diisi.', 422)),
             LeadSource::ArchitectPortfolio => $this->portfolioItem($id ?? throw new ApiException('reference_id portofolio wajib diisi.', 422)),
             LeadSource::KprCalculator => $id !== null ? $this->propertyItem($id) : null,
+            LeadSource::Promotion => $this->promotionItem($id ?? throw new ApiException('reference_id promosi wajib diisi.', 422)),
         };
     }
 
@@ -169,6 +172,18 @@ class ConciergeRoutingService
         }
 
         return ['kind' => 'Portofolio arsitek', 'code' => 'ARS-'.$portfolio->id, 'title' => $portfolio->title, 'price_label' => $label];
+    }
+
+    private function promotionItem(int $id): array
+    {
+        $banner = $this->banners->findLive($id) ?? throw new ApiException('Promosi tidak ditemukan atau sudah berakhir.', 404);
+
+        return [
+            'kind' => 'Promo mitra',
+            'code' => 'PROMO-'.$banner->id,
+            'title' => $banner->title,
+            'price_label' => 'Sumber: banner promosi di beranda',
+        ];
     }
 
     private function composeNotes(?array $item, ?string $note): ?string

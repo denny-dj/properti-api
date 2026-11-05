@@ -1,93 +1,107 @@
+{{--
+    Beranda "Managed Concierge Marketplace".
+    Variabel dari HomeController:
+      $heroBanner         ?AdBanner  banner top_hero (null -> hero bawaan)
+      $featuredProperties array     properti unggulan (alias lama: $latest)
+      $portfolios         array     portofolio arsitek pilihan
+      $promotions         Collection banner strip featured_developer
+      $services           array     layanan per jam (model lama; kosong bila CONCIERGE_LEGACY_UI=false)
+--}}
+@php
+    $featuredProperties ??= $latest ?? [];
+    $portfolios ??= [];
+    $promotions ??= collect();
+    $services ??= [];
+    $heroBanner ??= null;
+@endphp
 <x-layouts.app title="Beranda">
-    <section class="bg-gradient-to-br from-blue-700 to-blue-500 text-white">
-        <div class="mx-auto max-w-7xl px-4 py-16 md:py-24">
-            <h1 class="max-w-2xl text-3xl font-bold leading-tight md:text-5xl">Temukan rumah &amp; ruko impian, lengkap dengan konsultasi arsitek.</h1>
-            <p class="mt-4 max-w-xl text-blue-100">Cari properti terverifikasi, hitung cicilan KPR, dan pilih desain arsitek berdasarkan estimasi RAB. Admin kami mendampingi lewat WhatsApp.</p>
+    <x-hero-ad-banner :banner="$heroBanner" />
 
-            <form action="{{ route('properties.index') }}" method="GET" class="mt-8 grid max-w-3xl gap-3 rounded-2xl bg-white p-3 shadow-lg md:grid-cols-[1fr_auto_auto]">
-                <input type="text" name="q" placeholder="Cari lokasi atau nama properti, mis. Depok" class="rounded-xl border border-gray-200 px-4 py-3 text-gray-800 focus:border-blue-500 focus:outline-none">
-                <select name="property_type" class="rounded-xl border border-gray-200 px-4 py-3 text-gray-800">
-                    <option value="">Semua tipe</option>
-                    <option value="house">Rumah</option>
-                    <option value="shop">Ruko</option>
-                </select>
-                <button type="submit" class="rounded-xl bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700">Cari</button>
-            </form>
+    {{-- Pita kepercayaan --}}
+    <section class="border-b border-slate-200 bg-white">
+        <div class="mx-auto grid max-w-7xl gap-4 px-4 py-5 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach ([
+                ['shield', 'Partner terverifikasi', 'Developer & arsitek disaring admin.'],
+                ['chat', 'Didampingi admin', 'Konsultasi dan survei lewat WhatsApp.'],
+                ['wallet', 'Bayar lewat platform', 'Tautan resmi, tanpa transfer pribadi.'],
+                ['blueprint', 'RAB transparan', 'Estimasi biaya jelas sejak awal.'],
+            ] as [$icon, $title, $text])
+                <div class="flex items-start gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><x-icon :name="$icon" class="h-5 w-5" /></span>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-900">{{ $title }}</p>
+                        <p class="text-xs text-slate-500">{{ $text }}</p>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </section>
 
-    <x-promo-banners placement="top_hero" />
-
+    {{-- Pintasan --}}
     <section class="mx-auto max-w-7xl px-4 py-12">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ([
-                ['Cari Properti', 'Filter lokasi, harga, dan fasilitas.', route('properties.index')],
-                ['Lihat di Peta', 'Jelajahi properti langsung dari peta.', route('map')],
-                ['Portofolio Arsitek', 'Desain siap bangun & custom, lengkap dengan estimasi RAB.', route('portfolios.index')],
-                ['Simulasi KPR', 'Estimasi cicilan bulanan Anda.', route('kpr')],
-            ] as [$title, $text, $url])
-                <a href="{{ $url }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-                    <h3 class="font-semibold text-gray-900">{{ $title }}</h3>
-                    <p class="mt-1 text-sm text-gray-500">{{ $text }}</p>
+                ['search', 'Cari Properti', 'Filter lokasi, harga, dan fasilitas.', route('properties.index')],
+                ['pin', 'Lihat di Peta', 'Jelajahi properti langsung dari peta.', route('map')],
+                ['blueprint', 'Portofolio Arsitek', 'Desain siap bangun & custom, lengkap dengan estimasi RAB.', route('portfolios.index')],
+                ['wallet', 'Simulasi KPR', 'Estimasi cicilan bulanan Anda.', route('kpr')],
+            ] as [$icon, $title, $text, $url])
+                <a href="{{ $url }}" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white transition group-hover:bg-blue-600"><x-icon :name="$icon" class="h-5 w-5" /></span>
+                    <h3 class="mt-4 font-semibold text-slate-900">{{ $title }}</h3>
+                    <p class="mt-1 text-sm text-slate-500">{{ $text }}</p>
                 </a>
             @endforeach
         </div>
     </section>
 
-    <x-promo-banners placement="featured_developer" />
+    {{-- Iklan strip (featured_developer) --}}
+    <x-promo-banners :banners="$promotions" />
 
-    <section class="mx-auto mt-6 max-w-7xl px-4">
-        <div class="flex items-end justify-between">
-            <h2 class="text-2xl font-bold">Properti terbaru</h2>
-            <a href="{{ route('properties.index') }}" class="text-sm font-medium text-blue-700 hover:underline">Lihat semua &rarr;</a>
-        </div>
+    {{-- Properti unggulan --}}
+    <section class="mx-auto mt-10 max-w-7xl px-4">
+        <x-section-heading title="Properti unggulan" subtitle="Unit terverifikasi dengan estimasi cicilan. Tanyakan ketersediaan langsung ke admin." :href="route('properties.index')" link="Lihat semua properti" />
         <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            @forelse ($latest as $property)
+            @forelse ($featuredProperties as $property)
                 <x-property-card :property="$property" />
             @empty
-                <p class="col-span-full rounded-2xl border border-dashed border-gray-300 p-10 text-center text-gray-500">Belum ada properti yang tayang.</p>
+                <p class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">Belum ada properti yang tayang.</p>
             @endforelse
         </div>
     </section>
 
-    <section class="mx-auto mt-14 max-w-7xl px-4">
-        <div class="flex items-end justify-between">
-            <div>
-                <h2 class="text-2xl font-bold">Portofolio arsitek pilihan</h2>
-                <p class="text-sm text-gray-500">Lihat estimasi RAB per desain; beli desain siap bangun atau minta penyesuaian custom.</p>
-            </div>
-            <a href="{{ route('portfolios.index') }}" class="text-sm font-medium text-blue-700 hover:underline">Lihat semua &rarr;</a>
-        </div>
+    {{-- Portofolio arsitek --}}
+    <section class="mx-auto mt-16 max-w-7xl px-4">
+        <x-section-heading title="Portofolio arsitek pilihan" subtitle="Lihat estimasi RAB per desain. Beli desain siap bangun atau minta penyesuaian custom lewat admin." :href="route('portfolios.index')" link="Lihat semua portofolio" />
         <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @forelse ($portfolios as $portfolio)
                 <x-portfolio-card :portfolio="$portfolio" />
             @empty
-                <p class="col-span-full rounded-2xl border border-dashed border-gray-300 p-10 text-center text-gray-500">Portofolio arsitek segera hadir.</p>
+                <p class="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">Portofolio arsitek segera hadir.</p>
             @endforelse
         </div>
     </section>
 
-    <section class="mx-auto mt-14 max-w-7xl px-4">
-        <div class="flex items-end justify-between">
-            <h2 class="text-2xl font-bold">Cara kerja</h2>
-            <a href="{{ route('how-it-works') }}" class="text-sm font-medium text-blue-700 hover:underline">Selengkapnya &rarr;</a>
+    @include('sections.how-it-works')
+
+    {{-- Ajakan KPR --}}
+    <section class="mx-auto max-w-7xl px-4 py-14">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 px-6 py-10 text-white md:px-12 md:py-14">
+            <div class="max-w-2xl">
+                <h2 class="text-2xl font-bold tracking-tight md:text-3xl">Hitung cicilan, lalu ajukan KPR lewat bank rekanan</h2>
+                <p class="mt-2 text-slate-300">Simulasikan DP, bunga, dan tenor. Bila cocok, admin kami meneruskan pengajuan Anda ke bank rekanan.</p>
+                <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <a href="{{ route('kpr') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-500">Hitung Simulasi KPR <x-icon name="arrow-right" class="h-4 w-4" /></a>
+                    <a href="{{ route('how-it-works') }}" class="inline-flex items-center justify-center rounded-xl border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Pelajari alurnya</a>
+                </div>
+            </div>
         </div>
-        <ol class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-            @foreach ($steps as $step)
-                <li class="rounded-2xl border border-gray-200 bg-white p-4">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">{{ $step['step'] }}</span>
-                    <p class="mt-3 font-semibold text-gray-900">{{ $step['title'] }}</p>
-                </li>
-            @endforeach
-        </ol>
     </section>
 
+    {{-- Model lama: konsultasi per jam (hanya bila CONCIERGE_LEGACY_UI=true) --}}
     @if (config('concierge.legacy_ui', true) && count($services) > 0)
-        <section class="mx-auto mt-14 max-w-7xl px-4">
-            <div class="flex items-end justify-between">
-                <h2 class="text-2xl font-bold">Layanan arsitek</h2>
-                <a href="{{ route('architects.index') }}" class="text-sm font-medium text-blue-700 hover:underline">Lihat semua &rarr;</a>
-            </div>
+        <section class="mx-auto max-w-7xl px-4 pb-14">
+            <x-section-heading title="Layanan arsitek" :href="route('architects.index')" />
             <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($services as $service)
                     <x-architect-card :service="$service" />

@@ -7,6 +7,9 @@ return [
 
     'lead_prefix' => 'LEAD',
 
+    // Kartu portofolio menampilkan rentang RAB = estimasi ± persen ini (0 = tampilkan angka tunggal).
+    'rab_range_percent' => (float) env('CONCIERGE_RAB_RANGE_PERCENT', 10),
+
     // true  = tampilan lama masih ada: menu "Arsitek (konsultasi)", tombol "Chat penjual" dan "Bayar booking fee"
     //         langsung di detail properti, serta layanan arsitek di beranda.
     // false = antarmuka concierge murni: seluruh minat diarahkan ke WhatsApp admin.

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\LeadSource;
 use App\Exceptions\ApiException;
+use App\Models\AdBanner;
 use App\Models\ArchitectPortfolio;
 use App\Models\ConciergeLead;
 use App\Models\Property;
@@ -29,7 +30,13 @@ class ConciergeLeadService
             return null;
         }
 
-        return ($lead->source === LeadSource::ArchitectPortfolio ? 'portfolio' : 'property').':'.$lead->reference_id;
+        $type = match ($lead->source) {
+            LeadSource::ArchitectPortfolio => 'portfolio',
+            LeadSource::Promotion => 'promotion',
+            default => 'property',
+        };
+
+        return $type.':'.$lead->reference_id;
     }
 
     /**
@@ -42,6 +49,7 @@ class ConciergeLeadService
     {
         $propertyIds = [];
         $portfolioIds = [];
+        $promotionIds = [];
 
         foreach ($leads as $lead) {
             $key = self::referenceKey($lead);
@@ -52,6 +60,8 @@ class ConciergeLeadService
 
             if (str_starts_with($key, 'portfolio:')) {
                 $portfolioIds[] = $lead->reference_id;
+            } elseif (str_starts_with($key, 'promotion:')) {
+                $promotionIds[] = $lead->reference_id;
             } else {
                 $propertyIds[] = $lead->reference_id;
             }
@@ -76,6 +86,12 @@ class ConciergeLeadService
                     'url' => $p->deleted_at ? null : route('portfolios.show', $p->slug),
                     'available' => $p->deleted_at === null,
                 ];
+            }
+        }
+
+        if ($promotionIds !== []) {
+            foreach (AdBanner::whereIn('id', array_unique($promotionIds))->get(['id', 'title', 'target_url']) as $b) {
+                $titles["promotion:{$b->id}"] = ['title' => $b->title, 'url' => $b->target_url, 'available' => true];
             }
         }
 

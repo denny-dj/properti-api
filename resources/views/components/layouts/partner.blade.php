@@ -23,7 +23,9 @@
     }
 
     $items[] = ['Pembayaran masuk', route('partner.transactions'), ['partner.transactions']];
-    $items[] = ['Chat', route('chat.index'), ['chat.*']];
+    if (config('concierge.legacy_ui', true)) {
+        $items[] = ['Chat', route('chat.index'), ['chat.*']];
+    }
 @endphp
 <x-layouts.app :title="$title">
     <div class="mx-auto max-w-7xl gap-8 px-4 py-8 lg:grid lg:grid-cols-[220px_1fr]">

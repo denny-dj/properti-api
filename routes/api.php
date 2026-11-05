@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\BookingController as AdminBookingController;
+use App\Http\Middleware\EnsureLegacyUiEnabled;
 use App\Http\Controllers\Api\V1\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Api\V1\Admin\LeadController as AdminLeadController;
 use App\Http\Controllers\Api\V1\Admin\RevenueController as AdminRevenueController;
@@ -55,9 +56,12 @@ Route::prefix('v1')->group(function () {
 
     Route::post('kpr/simulate', [KprController::class, 'simulate'])->middleware('throttle:60,1');
 
-    Route::get('architect-services', [ArchitectServiceController::class, 'index']);
-    Route::get('architect-services/{slug}', [ArchitectServiceController::class, 'show']);
-    Route::get('architect-services/{slug}/slots', [ArchitectServiceController::class, 'slots']);
+    // Konsultasi per jam (model lama): ditutup saat CONCIERGE_LEGACY_UI=false
+    Route::middleware(EnsureLegacyUiEnabled::class)->group(function () {
+        Route::get('architect-services', [ArchitectServiceController::class, 'index']);
+        Route::get('architect-services/{slug}', [ArchitectServiceController::class, 'show']);
+        Route::get('architect-services/{slug}/slots', [ArchitectServiceController::class, 'slots']);
+    });
 
     // ---------- Concierge: portofolio arsitek, prospek, konten ----------
     Route::get('architect-portfolios', [ArchitectPortfolioController::class, 'index']);
@@ -81,7 +85,7 @@ Route::prefix('v1')->group(function () {
         });
 
         // Chat: buyer & partner (admin tidak ikut membaca chat privat)
-        Route::middleware('role:user|partner')->group(function () {
+        Route::middleware(['role:user|partner', EnsureLegacyUiEnabled::class])->group(function () {
             Route::get('conversations', [ConversationController::class, 'index']);
             Route::post('conversations', [ConversationController::class, 'store'])->middleware('role:user');
             Route::get('conversations/{conversation}/messages', [MessageController::class, 'index']);
@@ -99,13 +103,17 @@ Route::prefix('v1')->group(function () {
 
         // Buyer / klien
         Route::middleware('role:user')->group(function () {
-            Route::get('bookings', [BookingController::class, 'index']);
-            Route::post('bookings', [BookingController::class, 'store'])->middleware('throttle:20,1');
-            Route::get('bookings/{booking}', [BookingController::class, 'show']);
-            Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
+            // Model lama (konsultasi per jam & bayar mandiri): ditutup saat CONCIERGE_LEGACY_UI=false.
+            // Pembayaran concierge dibuat admin lewat POST /admin/invoices/quick-booking.
+            Route::middleware(EnsureLegacyUiEnabled::class)->group(function () {
+                Route::get('bookings', [BookingController::class, 'index']);
+                Route::post('bookings', [BookingController::class, 'store'])->middleware('throttle:20,1');
+                Route::get('bookings/{booking}', [BookingController::class, 'show']);
+                Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel']);
 
-            Route::post('payments/property-booking-fee', [PaymentController::class, 'propertyBookingFee'])->middleware('throttle:10,1');
-            Route::post('payments/architect-bookings', [PaymentController::class, 'architectBooking'])->middleware('throttle:10,1');
+                Route::post('payments/property-booking-fee', [PaymentController::class, 'propertyBookingFee'])->middleware('throttle:10,1');
+                Route::post('payments/architect-bookings', [PaymentController::class, 'architectBooking'])->middleware('throttle:10,1');
+            });
             Route::get('transactions', [TransactionController::class, 'index']);
         });
 
@@ -142,18 +150,21 @@ Route::prefix('v1')->group(function () {
             Route::post('transactions/{transaction}/submit-deliverable', [DeliverableController::class, 'submit'])->middleware('throttle:30,1');
             Route::get('balance', [DeliverableController::class, 'balance']);
 
-            Route::get('availabilities', [AvailabilityController::class, 'show']);
-            Route::put('availabilities', [AvailabilityController::class, 'update']);
+            // Model lama (konsultasi per jam): ditutup saat CONCIERGE_LEGACY_UI=false
+            Route::middleware(EnsureLegacyUiEnabled::class)->group(function () {
+                Route::get('availabilities', [AvailabilityController::class, 'show']);
+                Route::put('availabilities', [AvailabilityController::class, 'update']);
 
-            Route::apiResource('architect-services', PartnerArchitectServiceController::class)
-                ->parameters(['architect-services' => 'architectService']);
+                Route::apiResource('architect-services', PartnerArchitectServiceController::class)
+                    ->parameters(['architect-services' => 'architectService']);
 
-            Route::get('bookings', [PartnerBookingController::class, 'index']);
-            Route::get('bookings/{booking}', [PartnerBookingController::class, 'show']);
-            Route::post('bookings/{booking}/confirm', [PartnerBookingController::class, 'confirm']);
-            Route::post('bookings/{booking}/reject', [PartnerBookingController::class, 'reject']);
-            Route::post('bookings/{booking}/complete', [PartnerBookingController::class, 'complete']);
-            Route::post('bookings/{booking}/cancel', [PartnerBookingController::class, 'cancel']);
+                Route::get('bookings', [PartnerBookingController::class, 'index']);
+                Route::get('bookings/{booking}', [PartnerBookingController::class, 'show']);
+                Route::post('bookings/{booking}/confirm', [PartnerBookingController::class, 'confirm']);
+                Route::post('bookings/{booking}/reject', [PartnerBookingController::class, 'reject']);
+                Route::post('bookings/{booking}/complete', [PartnerBookingController::class, 'complete']);
+                Route::post('bookings/{booking}/cancel', [PartnerBookingController::class, 'cancel']);
+            });
         });
 
         // Administrator

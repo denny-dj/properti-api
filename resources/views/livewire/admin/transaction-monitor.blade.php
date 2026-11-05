@@ -5,6 +5,46 @@
 <div class="space-y-5">
     <h1 class="text-2xl font-bold">Transaksi</h1>
 
+    <details class="rounded-2xl border border-gray-200 bg-white p-4">
+        <summary class="cursor-pointer text-sm font-medium text-blue-700">Ekspor CSV untuk kertas kerja keuangan</summary>
+        <form method="GET" action="{{ route('admin.transactions.export') }}" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            <div>
+                <label class="block text-xs font-medium text-gray-600">Jenis</label>
+                <select name="jenis" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                    <option value="properti">Properti (booking fee)</option>
+                    <option value="desain">Desain arsitek</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600">Status</label>
+                <select name="status" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                    <option value="">Lunas + dikembalikan</option>
+                    <option value="paid">Lunas saja</option>
+                    <option value="refunded">Dikembalikan saja</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600">Dari tanggal</label>
+                <input type="date" name="from" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600">Sampai tanggal</label>
+                <input type="date" name="to" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-600">Pemisah kolom</label>
+                <select name="delimiter" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                    <option value="semicolon">Titik koma (Excel Indonesia)</option>
+                    <option value="comma">Koma (Google Sheets / Excel Inggris)</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Unduh CSV</button>
+            </div>
+        </form>
+        <p class="mt-3 text-xs text-gray-500">Jenis "Properti": tempel kolom A sampai J ke sheet PROPERTY_TRANSACTIONS; kolom setelahnya hanya rujukan. Biaya Payment Gateway aktual tidak tersimpan di aplikasi dan harus diisi dari laporan settlement Midtrans.</p>
+    </details>
+
     <div class="grid gap-4 sm:grid-cols-3">
         <div class="rounded-2xl border border-gray-200 bg-white p-5"><p class="text-sm text-gray-500">Lunas (sesuai filter)</p><p class="mt-1 text-xl font-bold text-green-700"><x-rupiah :value="$summary['paid_total_amount']" /></p></div>
         <div class="rounded-2xl border border-gray-200 bg-white p-5"><p class="text-sm text-gray-500">Jumlah transaksi lunas</p><p class="mt-1 text-xl font-bold">{{ $summary['paid_count'] }}</p></div>

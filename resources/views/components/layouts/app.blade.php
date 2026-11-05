@@ -66,11 +66,13 @@
                         @if ($me->hasRole('partner'))
                             <a href="{{ route('partner.dashboard') }}" class="block px-4 py-2 text-sm font-medium text-blue-700 hover:bg-gray-50">Dashboard mitra</a>
                         @endif
-                        @if ($me->hasAnyRole(['user', 'partner']))
+                        @if (config('concierge.legacy_ui', true) && $me->hasAnyRole(['user', 'partner']))
                             <a href="{{ route('chat.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Chat</a>
                         @endif
                         @if ($me->hasRole('user'))
-                            <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Pesanan konsultasi</a>
+                            @if (config('concierge.legacy_ui', true))
+                                <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Pesanan konsultasi</a>
+                            @endif
                             <a href="{{ route('transactions.index') }}" class="block px-4 py-2 text-sm hover:bg-gray-50">Transaksi</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
@@ -102,11 +104,13 @@
                 @if (auth()->user()->hasRole('partner'))
                     <a href="{{ route('partner.dashboard') }}" class="block py-2 text-sm font-medium text-blue-700">Dashboard mitra</a>
                 @endif
-                @if (auth()->user()->hasAnyRole(['user', 'partner']))
+                @if (config('concierge.legacy_ui', true) && auth()->user()->hasAnyRole(['user', 'partner']))
                     <a href="{{ route('chat.index') }}" class="block py-2 text-sm font-medium text-gray-700">Chat</a>
                 @endif
                 @if (auth()->user()->hasRole('user'))
-                    <a href="{{ route('orders.index') }}" class="block py-2 text-sm font-medium text-gray-700">Pesanan konsultasi</a>
+                    @if (config('concierge.legacy_ui', true))
+                        <a href="{{ route('orders.index') }}" class="block py-2 text-sm font-medium text-gray-700">Pesanan konsultasi</a>
+                    @endif
                     <a href="{{ route('transactions.index') }}" class="block py-2 text-sm font-medium text-gray-700">Transaksi</a>
                 @endif
                 <form method="POST" action="{{ route('logout') }}">

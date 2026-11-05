@@ -13,6 +13,8 @@ use App\Http\Controllers\Web\PortfolioPageController;
 use App\Http\Controllers\Web\PromoClickController;
 use App\Http\Controllers\Web\PropertyPageController;
 use App\Http\Controllers\Web\VerifyEmailController;
+use App\Http\Controllers\Web\Admin\TransactionExportController;
+use App\Http\Middleware\EnsureLegacyUiEnabled;
 use App\Http\Middleware\EnsurePartnerApprovedWeb;
 use Illuminate\Support\Facades\Route;
 
@@ -23,8 +25,8 @@ Route::view('/properti', 'pages.properties')->name('properties.index');
 Route::get('/properti/{slug}', [PropertyPageController::class, 'show'])->name('properties.show');
 Route::view('/peta', 'pages.map')->name('map');
 
-Route::view('/arsitek', 'pages.architects')->name('architects.index');
-Route::get('/arsitek/{slug}', [ArchitectPageController::class, 'show'])->name('architects.show');
+Route::view('/arsitek', 'pages.architects')->middleware(EnsureLegacyUiEnabled::class.':portfolios.index')->name('architects.index');
+Route::get('/arsitek/{slug}', [ArchitectPageController::class, 'show'])->middleware(EnsureLegacyUiEnabled::class.':portfolios.index')->name('architects.show');
 
 Route::view('/kpr', 'pages.kpr')->name('kpr');
 
@@ -57,15 +59,15 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
 
     // Chat: buyer & partner
-    Route::middleware('role:user|partner')->group(function () {
+    Route::middleware(['role:user|partner', EnsureLegacyUiEnabled::class.':how-it-works'])->group(function () {
         Route::view('/chat', 'pages.chat-inbox')->name('chat.index');
         Route::get('/chat/{conversation}', [ChatPageController::class, 'show'])->name('chat.room');
     });
 
     // Pembeli: pesanan konsultasi, transaksi, pembayaran
     Route::middleware('role:user')->group(function () {
-        Route::view('/pesanan', 'pages.orders')->name('orders.index');
-        Route::get('/pesanan/{booking}', [OrderPageController::class, 'booking'])->name('orders.show');
+        Route::view('/pesanan', 'pages.orders')->middleware(EnsureLegacyUiEnabled::class.':transactions.index')->name('orders.index');
+        Route::get('/pesanan/{booking}', [OrderPageController::class, 'booking'])->middleware(EnsureLegacyUiEnabled::class.':transactions.index')->name('orders.show');
 
         Route::view('/transaksi', 'pages.transactions')->name('transactions.index');
         Route::get('/transaksi/{transaction}', [OrderPageController::class, 'transaction'])->name('transactions.show');
@@ -95,9 +97,11 @@ Route::middleware(['auth', 'role:partner'])->prefix('mitra')->name('partner.')->
         Route::get('/portofolio/{id}/ubah', [PartnerPortfolioPageController::class, 'edit'])->whereNumber('id')->name('portfolios.edit');
         Route::view('/pesanan-desain', 'pages.partner.design-orders')->name('design-orders');
 
-        Route::view('/layanan', 'pages.partner.services')->name('services');
-        Route::view('/jadwal', 'pages.partner.availability')->name('availability');
-        Route::view('/pesanan', 'pages.partner.bookings')->name('bookings');
+        Route::middleware(EnsureLegacyUiEnabled::class.':partner.portfolios.index')->group(function () {
+            Route::view('/layanan', 'pages.partner.services')->name('services');
+            Route::view('/jadwal', 'pages.partner.availability')->name('availability');
+            Route::view('/pesanan', 'pages.partner.bookings')->name('bookings');
+        });
     });
 });
 
@@ -111,6 +115,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::view('/pesanan', 'pages.admin.bookings')->middleware('permission:bookings.view')->name('bookings');
     Route::view('/transaksi', 'pages.admin.transactions')->middleware('permission:transactions.view')->name('transactions');
     Route::view('/pendapatan', 'pages.admin.revenue')->middleware('permission:transactions.view')->name('revenue');
+    Route::get('/transaksi/ekspor', TransactionExportController::class)->middleware('permission:transactions.view')->name('transactions.export');
 
     // Cockpit concierge (garda depan)
     Route::view('/prospek', 'pages.admin.leads')->middleware('permission:concierge.manage')->name('leads');

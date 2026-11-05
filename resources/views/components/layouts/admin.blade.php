@@ -14,7 +14,7 @@
     if ($admin->can('users.manage')) {
         $items[] = ['Pengguna', route('admin.users'), ['admin.users'], 0];
     }
-    if ($admin->can('bookings.view')) {
+    if (config('concierge.legacy_ui', true) && $admin->can('bookings.view')) {
         $items[] = ['Pesanan konsultasi', route('admin.bookings'), ['admin.bookings'], 0];
     }
     if ($admin->can('transactions.view')) {

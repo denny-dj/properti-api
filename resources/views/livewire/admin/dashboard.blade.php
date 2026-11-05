@@ -72,14 +72,16 @@
                 @endforeach
             </ul>
         </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-5">
-            <h2 class="font-semibold">Pesanan konsultasi</h2>
-            <ul class="mt-3 space-y-1 text-sm text-gray-600">
-                @foreach ($bookingLabels as $key => $label)
-                    <li class="flex justify-between"><span>{{ $label }}</span><span class="font-medium">{{ $overview['bookings'][$key] ?? 0 }}</span></li>
-                @endforeach
-            </ul>
-        </div>
+        @if (config('concierge.legacy_ui', true))
+            <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                <h2 class="font-semibold">Pesanan konsultasi</h2>
+                <ul class="mt-3 space-y-1 text-sm text-gray-600">
+                    @foreach ($bookingLabels as $key => $label)
+                        <li class="flex justify-between"><span>{{ $label }}</span><span class="font-medium">{{ $overview['bookings'][$key] ?? 0 }}</span></li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">

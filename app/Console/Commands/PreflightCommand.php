@@ -33,6 +33,7 @@ class PreflightCommand extends Command
         $this->checkIntegrations();
 
         if ($dbOk) {
+            $this->checkConcierge();
             $this->checkAccounts();
         }
 
@@ -208,6 +209,32 @@ class PreflightCommand extends Command
             : $this->failCheck('WhatsApp admin (concierge)', 'ADMIN_WA_NUMBER belum valid (format 62812xxxxxxx). Tautan WhatsApp concierge tidak berfungsi.');
     }
 
+    private function checkConcierge(): void
+    {
+        $tables = ['architect_portfolios', 'concierge_leads', 'ad_banners', 'partner_payouts'];
+        $missing = array_values(array_filter($tables, fn (string $t) => ! \Illuminate\Support\Facades\Schema::hasTable($t)));
+
+        $missing === []
+            ? $this->pass('Tabel concierge')
+            : $this->failCheck('Tabel concierge', 'Tabel belum ada: '.implode(', ', $missing).'. Jalankan php artisan migrate --force.');
+
+        try {
+            $needed = ['concierge.manage', 'payouts.manage'];
+            $have = \Spatie\Permission\Models\Permission::whereIn('name', $needed)->pluck('name')->all();
+            $lacking = array_values(array_diff($needed, $have));
+
+            $lacking === []
+                ? $this->pass('Izin admin concierge')
+                : $this->failCheck('Izin admin concierge', 'Izin belum ada: '.implode(', ', $lacking).'. Jalankan php artisan db:seed --class=RoleSeeder --force.');
+        } catch (\Throwable) {
+            $this->failCheck('Izin admin concierge', 'Tabel izin tidak dapat dibaca. Jalankan migrasi dan RoleSeeder.');
+        }
+
+        config('concierge.legacy_ui', true)
+            ? $this->caution('Mode concierge', 'CONCIERGE_LEGACY_UI=true: chat langsung, konsultasi per jam, dan bayar mandiri masih aktif. Atur false bila seluruh minat harus lewat admin.')
+            : $this->pass('Mode concierge', 'murni: minat diarahkan ke WhatsApp admin');
+    }
+
     private function checkAccounts(): void
     {
         $demo = ['admin@example.com', 'buyer@example.com', 'seller@example.com', 'architect@example.com'];
@@ -216,7 +243,8 @@ class PreflightCommand extends Command
             ? $this->failCheck('Akun demo', 'Akun demo (@example.com, password "password") masih ada. Hapus sebelum go-live.')
             : $this->pass('Akun demo');
 
-        User::role('admin')->exists()
+        // whereHas (bukan User::role) agar tidak melempar RoleDoesNotExist bila peran belum di-seed
+        User::whereHas('roles', fn ($q) => $q->where('name', 'admin'))->exists()
             ? $this->pass('Administrator')
             : $this->failCheck('Administrator', 'Belum ada administrator. Jalankan php artisan app:create-admin email@anda.com.');
     }

@@ -20,6 +20,10 @@ memeriksa otomatis sebagian besar butir di bawah dan harus dijalankan di server 
 | 11 | Backup database + foto terjadwal dan **pernah diuji dipulihkan** | Bagian 10 |
 | 12 | Log harian + pemantauan error + pemantauan uptime | Bagian 11 |
 | 13 | Kebijakan bisnis: booking fee, komisi, refund, syarat & privasi | Diputuskan pemilik proyek |
+| 14 | `ADMIN_WA_NUMBER` terisi (format `62812...`) | `app:preflight` |
+| 15 | Tabel dan izin concierge ada (`migrate`, lalu `RoleSeeder` **setiap kali ada izin baru**) | `app:preflight` |
+| 16 | `CONCIERGE_LEGACY_UI` sesuai keputusan (false = hanya lewat WhatsApp admin) | `app:preflight` |
+| 17 | Prosedur pencairan saldo mitra dan data rekening mitra (lihat `docs/CONCIERGE.md`) | Diputuskan pemilik proyek |
 
 ## 2. Kebutuhan server
 
@@ -191,3 +195,7 @@ php artisan queue:restart && php artisan up
 4. Pembeli: chat penjual; bayar booking fee nominal kecil; status menjadi *Lunas*; properti menjadi *Dipesan*; penjual & pembeli menerima email.
 5. Arsitek: atur jadwal; pembeli memesan slot; arsitek mengonfirmasi; pembeli membayar.
 6. Admin: tinjau transaksi, catat pengembalian dana uji, suspend lalu aktifkan kembali sebuah akun.
+7. Concierge: tombol WhatsApp di detail properti/portofolio membuka WhatsApp admin dengan kode prospek; prospek muncul di `/admin/prospek`.
+8. Admin: buat invoice cepat dari prospek, bayar dengan akun uji (nominal kecil), pastikan status *Lunas* dan email diterima.
+9. Arsitek: kirim tautan Google Drive pada pesanan desain; pembeli menekan *Konfirmasi Penerimaan Berkas*; saldo mitra bertambah.
+10. Admin: catat pencairan uji di `/admin/pencairan`, lalu unduh CSV dari `/admin/transaksi` dan buka di Excel/Sheets.

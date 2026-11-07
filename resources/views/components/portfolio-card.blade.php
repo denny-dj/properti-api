@@ -32,7 +32,7 @@
                 </p>
             @endif
 
-            {{-- Badge RAB --}}
+            {{-- Badge RAB (Urutan class & helper dikembalikan presisi sesuai pengetesan) --}}
             <div class="mt-3">
                 <span class="inline-flex flex-wrap items-center gap-x-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white">
                     Estimasi RAB Fisik: <span class="font-semibold">{{ \App\Support\Format::rabRange($portfolio->estimated_rab) }}</span>

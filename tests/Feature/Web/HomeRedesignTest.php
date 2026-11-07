@@ -6,6 +6,7 @@ use App\Enums\PartnerType;
 use App\Livewire\Admin\LeadInbox;
 use App\Models\AdBanner;
 use App\Models\ArchitectPortfolio;
+use App\Models\ArchitectService;
 use App\Models\ConciergeLead;
 use App\Models\Property;
 use App\Models\User;
@@ -133,7 +134,7 @@ class HomeRedesignTest extends TestCase
             ->assertSee('Japandi')
             ->assertSee('Estimasi RAB Fisik')
             ->assertSee('Rp 270 Jt – Rp 330 Jt')
-            ->assertSee('Blueprint siap bangun')
+            ->assertSee('Blueprint Siap Bangun')
             ->assertSee('Paket Gambar Jadi')
             ->assertSee('Rp 5.000.000')
             ->assertSee('Studio Arsitek Uji')
@@ -226,5 +227,87 @@ class HomeRedesignTest extends TestCase
         Livewire::actingAs(User::factory()->admin()->create())->test(LeadInbox::class)
             ->assertSee('Banner promo')
             ->assertSee('Promo Admin Uji');
+    }
+
+    // ------------------------------------------------------------------ struktur & polesan visual (9B)
+
+    public function test_home_has_a_single_navbar_and_renders_no_empty_ad_containers(): void
+    {
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertSame(1, substr_count($html, '<header'), 'Hanya boleh ada satu navbar (dari layout).');
+        $this->assertSame(1, substr_count($html, '<nav'));
+        $this->assertStringNotContainsString('bg-emerald-600', $html);   // tanpa data tidak ada blok/tombol hijau
+        $this->assertStringNotContainsString('>Iklan<', $html);          // strip iklan tidak dirender bila kosong
+    }
+
+    public function test_sections_follow_the_requested_order_and_legacy_services_follow_the_switch(): void
+    {
+        Property::factory()->published()->create(['title' => 'Rumah Urutan Uji']);
+        ArchitectPortfolio::factory()->published()->create(['title' => 'Desain Urutan Uji']);
+        ArchitectService::factory()->create(['title' => 'Layanan Urutan Uji']);
+
+        $this->get('/')->assertOk()->assertSeeInOrder([
+            'Properti unggulan',
+            'Rumah Urutan Uji',
+            'Portofolio arsitek pilihan',
+            'Desain Urutan Uji',
+            'Layanan & Jasa Arsitek',
+            'Layanan Urutan Uji',
+            'Cara kerja, dari konsultasi sampai serah terima',
+            'Hitung cicilan, lalu ajukan KPR lewat bank rekanan',
+        ]);
+
+        config(['concierge.legacy_ui' => false]);
+        $this->get('/')->assertOk()
+            ->assertDontSee('Layanan & Jasa Arsitek')
+            ->assertSee('Cara kerja, dari konsultasi sampai serah terima');
+    }
+
+    public function test_ad_strip_is_rendered_only_when_there_are_active_banners(): void
+    {
+        $this->get('/')->assertOk()->assertDontSee('>Iklan<', false);
+
+        AdBanner::factory()->create(['title' => 'Strip Aktif Uji', 'placement' => 'featured_developer']);
+        $this->get('/')->assertOk()->assertSee('Strip Aktif Uji')->assertSee('>Iklan<', false);
+    }
+
+    public function test_cards_and_sections_use_the_requested_utility_classes(): void
+    {
+        Property::factory()->published()->create(['title' => 'Rumah Gaya Uji']);
+        ArchitectPortfolio::factory()->published()->create(['title' => 'Desain Gaya Uji']);
+
+        $this->get('/')
+            ->assertOk()
+            // beranda: font, latar, kartu properti, gambar, CTA
+            ->assertSee('family=Plus+Jakarta+Sans', false)
+            ->assertSee('bg-slate-50/50', false)
+            ->assertSee('hover:-translate-y-1', false)
+            ->assertSee('border-slate-100', false)
+            ->assertSee('bg-emerald-600', false)
+            ->assertSee('hover:bg-emerald-700', false)
+            ->assertSee('shadow-emerald-200', false)
+            // badge RAB
+            ->assertSee('bg-slate-900 px-3 py-1.5 text-xs font-medium text-white', false)
+            // cara kerja: latar, grid 6 kolom, kartu langkah
+            ->assertSee('bg-slate-900 px-4 py-16', false)
+            ->assertSee('grid-cols-2', false)
+            ->assertSee('lg:grid-cols-6', false)
+            ->assertSee('bg-slate-800/60', false)
+            ->assertSee('border-slate-700/50', false);
+    }
+
+    public function test_portfolio_card_falls_back_to_a_stock_photo_without_cover(): void
+    {
+        config(['concierge.fallback_portfolio_images' => ['https://images.unsplash.com/photo-uji-satu', 'https://images.unsplash.com/photo-uji-dua']]);
+
+        $portfolio = ArchitectPortfolio::factory()->published()->create(['title' => 'Tanpa Cover Uji']);
+
+        $expected = ['https://images.unsplash.com/photo-uji-satu', 'https://images.unsplash.com/photo-uji-dua'][$portfolio->id % 2];
+
+        $this->get('/')->assertOk()->assertSee($expected, false)->assertSee('aspect-[16/10] w-full object-cover', false);
+
+        config(['concierge.fallback_portfolio_images' => []]);
+        $this->get('/')->assertOk()->assertSee('Tanpa Cover Uji')->assertDontSee('images.unsplash.com', false);
     }
 }

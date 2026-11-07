@@ -7,6 +7,15 @@ return [
 
     'lead_prefix' => 'LEAD',
 
+    // Foto cadangan kartu portofolio yang belum punya cover (dipilih berdasarkan id agar konsisten).
+    // Ganti/tambah URL sesuai kebutuhan; gambar yang gagal dimuat disembunyikan otomatis.
+    'fallback_portfolio_images' => [
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
+    ],
+
     // Kartu portofolio menampilkan rentang RAB = estimasi ± persen ini (0 = tampilkan angka tunggal).
     'rab_range_percent' => (float) env('CONCIERGE_RAB_RANGE_PERCENT', 10),
 

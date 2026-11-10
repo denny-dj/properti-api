@@ -50,11 +50,30 @@
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <a href="{{ route('home') }}" class="text-xl font-bold text-blue-700">{{ config('app.name') }}</a>
 
-        <nav class="hidden items-center gap-6 md:flex">
+        {{-- <nav class="hidden items-center gap-6 md:flex">
             @foreach ($nav as [$label, $url, $active])
                 <a href="{{ $url }}" class="text-sm font-medium {{ $active ? 'text-blue-700' : 'text-gray-600 hover:text-blue-700' }}">{{ $label }}</a>
             @endforeach
-        </nav>
+        </nav> --}}
+        <nav class="hidden items-center gap-6 md:flex">
+    @if (request()->routeIs('admin.*'))
+        {{-- Navigasi Khusus Panel Administrator --}}
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 border border-slate-200">
+                Panel Administrator
+            </span>
+            <a href="{{ route('home') }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+                <span>Lihat Web Publik</span>
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+        </div>
+    @else
+        {{-- Navigasi Standar Pengunjung & Pembeli --}}
+        @foreach ($nav as [$label, $url, $active])
+            <a href="{{ $url }}" class="text-sm font-medium {{ $active ? 'text-blue-700' : 'text-gray-600 hover:text-blue-700' }}">{{ $label }}</a>
+        @endforeach
+    @endif
+</nav>
 
         <div class="hidden items-center gap-3 md:flex">
             @auth

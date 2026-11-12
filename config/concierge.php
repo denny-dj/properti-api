@@ -7,6 +7,10 @@ return [
 
     'lead_prefix' => 'LEAD',
 
+    // Bila true, mitra yang sudah disetujui dan mengubah nama usaha / nomor izin dikembalikan ke status "pending"
+    // untuk ditinjau ulang admin (mitra tidak dapat memakai area mitra sampai disetujui lagi). Bawaan: dimatikan.
+    'partner_reverify_on_identity_change' => (bool) env('PARTNER_REVERIFY_ON_IDENTITY_CHANGE', false),
+
     // Foto cadangan kartu portofolio yang belum punya cover (dipilih berdasarkan id agar konsisten).
     // Ganti/tambah URL sesuai kebutuhan; gambar yang gagal dimuat disembunyikan otomatis.
     'fallback_portfolio_images' => [

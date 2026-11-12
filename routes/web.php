@@ -61,6 +61,9 @@ Route::middleware('auth')->group(function () {
 // ---------- Area akun (wajib login) ----------
 Route::middleware('auth')->group(function () {
 
+    // Pengaturan profil: semua peran (pembeli, mitra, admin)
+    Route::view('/profil', 'pages.profile')->name('profile');
+
     // Chat: buyer & partner
     Route::middleware(['role:user|partner', EnsureLegacyUiEnabled::class.':how-it-works'])->group(function () {
         Route::view('/chat', 'pages.chat-inbox')->name('chat.index');
